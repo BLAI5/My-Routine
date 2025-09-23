@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Routine Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center p-6">
+
+    <!-- Header and Points Display -->
+    <header class="w-full max-w-2xl text-center mb-8">
+        <h1 class="text-4xl sm:text-5xl font-bold text-blue-700 mb-2">My Routine Tracker</h1>
+        <p class="text-xl text-green-600 font-semibold rounded-full bg-green-100 py-2 px-4 inline-block shadow-sm">
+            Points: <span id="current-points">0</span>
+        </p>
+    </header>
+
+    <!-- Add Task Section -->
+    <div class="w-full max-w-lg bg-white p-6 rounded-2xl shadow-lg mb-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Add a Task</h2>
+        <input type="text" id="kid-name" placeholder="Enter name" class="w-full p-3 mb-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+        <select id="task-select" class="w-full p-3 mb-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:focus:border-blue-500 transition-colors">
+            <option value="">--Select a task--</option>
+            <option value="Brush Teeth">Brush Teeth</option>
+            <option value="Eat Breakfast">Eat Breakfast</option>
+            <option value="Get Dressed">Get Dressed</option>
+            <option value="Grab Dance Bags">Grab Dance Bags</option>
+            <option value="Make Lunch">Make Lunch</option>
+            <option value="Put On Shoes">Put On Shoes</option>
+        </select>
+        <div class="flex flex-col sm:flex-col gap-4 items-center mt-4">
+            <!-- Simplified time inputs -->
+            <div class="flex flex-row gap-4 items-center w-full">
+                <input type="number" id="task-hour" placeholder="Hour (1-12)" min="1" max="12" class="flex-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                <input type="number" id="task-minute" placeholder="Minute (00-59)" min="0" max="59" class="flex-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                <select id="task-ampm" class="flex-1 p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    <option value="">AM/PM</option>
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                </select>
+            </div>
+            <button onclick="addTask()" class="w-full px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg">
+                Add
+            </button>
+        </div>
+        <!-- Prominent error message now shown here -->
+        <div id="error-message" class="hidden text-center mt-4 p-3 bg-red-100 text-red-700 rounded-lg font-bold shadow">
+            Please select a task and enter a valid time (e.g., Hour: 8, Minute: 30, AM).
+        </div>
+        <!-- Action buttons -->
+        <div class="flex flex-col sm:flex-row justify-between mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
+            <button onclick="resetDay()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">
+                Restart Day
+            </button>
+            <button onclick="clearTasks()" class="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-xl font-bold hover:bg-yellow-600 transition-colors">
+                Clear All Tasks
+            </button>
+            <button onclick="showStickers()" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors">
+                View Stickers
+            </button>
+        </div>
+    </div>
+    
+    <!-- Success message container -->
+    <div id="success-message-container" class="w-full max-w-xl text-center hidden mb-8">
+        <div class="p-6 bg-yellow-200 rounded-2xl shadow-xl border-4 border-yellow-400">
+            <p class="text-3xl font-bold text-yellow-800 animate-pulse">🎉 Woohoo!</p>
+            <p class="text-xl text-yellow-700 mt-2">All tasks completed! Here's a virtual sticker. ✨</p>
+        </div>
+    </div>
+
+    <!-- Sticker Modal -->
+    <div id="sticker-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl relative w-11/12 max-w-md">
+            <button onclick="hideStickers()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
+            <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Your Stickers</h3>
+            <div id="stickers-gallery" class="flex flex-wrap justify-center gap-4 p-4 min-h-[100px] border border-gray-200 rounded-xl">
+                <!-- Stickers will be added here -->
+            </div>
+            <button onclick="clearStickers()" class="mt-4 w-full px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">
+                Clear Stickers
+            </button>
+        </div>
+    </div>
+    
+    <!-- Confirmation Dialog -->
+    <div id="confirmation-dialog" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-11/12 max-w-sm text-center">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Are you sure you want to delete this task?</h3>
+            <p class="text-gray-600 mb-6">This action cannot be undone.</p>
+            <div class="flex justify-around space-x-4">
+                <button id="confirm-delete-btn" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">Yes, Delete</button>
+                <button id="cancel-delete-btn" class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-xl font-bold hover:bg-gray-500 transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasks Container -->
+    <div id="tasks-container" class="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Tasks will be added here by JavaScript -->
+    </div>
+
+    <script>
+        // Global variables and DOM elements
+        let points = 0;
+        let totalTasks = 0;
+        let completedTasks = 0;
+        let stickers = []; // Array to store earned stickers
+        let taskToDelete = null; // To hold the task card element to be deleted
+
+        const tasksContainer = document.getElementById('tasks-container');
+        const pointsDisplay = document.getElementById('current-points');
+        const errorMessage = document.getElementById('error-message');
+        const successMessageContainer = document.getElementById('success-message-container');
+        const stickerModal = document.getElementById('sticker-modal');
+        const stickersGallery = document.getElementById('stickers-gallery');
+        const confirmationDialog = document.getElementById('confirmation-dialog');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
+        const kidNameInput = document.getElementById('kid-name');
+        const taskSelect = document.getElementById('task-select');
+        const taskHourInput = document.getElementById('task-hour');
+        const taskMinuteInput = document.getElementById('task-minute');
+        const taskAmpmSelect = document.getElementById('task-ampm');
+        
+        // A simple object to store task names and their corresponding placeholder image URLs
+        const taskImages = {
+            'Brush Teeth': 'https://placehold.co/200x200/5a9bd4/FFFFFF?text=Brush+Teeth',
+            'Eat Breakfast': 'https://placehold.co/200x200/f4b400/FFFFFF?text=Eat+Breakfast',
+            'Get Dressed': 'https://placehold.co/200x200/0f9d58/FFFFFF?text=Get+Dressed',
+            'Grab Dance Bags': 'https://placehold.co/200x200/db4437/FFFFFF?text=Dance+Bags',
+            'Make Lunch': 'https://placehold.co/200x200/4285f4/FFFFFF?text=Make+Lunch',
+            'Put On Shoes': 'https://placehold.co/200x200/9e9e9e/FFFFFF?text=Put+on+Shoes'
+        };
+
+        function updatePointsDisplay() {
+            pointsDisplay.textContent = points;
+        }
+        
+        // Save stickers to localStorage
+        function saveStickers() {
+            try {
+                localStorage.setItem('stickers', JSON.stringify(stickers));
+            } catch (e) {
+                console.error("Error saving stickers to localStorage:", e);
+            }
+        }
+        
+        // Load stickers from localStorage
+        function loadStickers() {
+            try {
+                const storedStickers = localStorage.getItem('stickers');
+                if (storedStickers) {
+                    stickers = JSON.parse(storedStickers);
+                }
+            } catch (e) {
+                console.error("Error loading stickers from localStorage:", e);
+            }
+        }
+
+        // Checks if all tasks have been completed on time and displays a message
+        function checkCompletion() {
+            // Only check for completion if there are tasks and all have been clicked
+            if (totalTasks > 0 && completedTasks === totalTasks) {
+                successMessageContainer.classList.remove('hidden');
+                stickers.push('✨'); // Add a new sticker
+                saveStickers(); // Save the new sticker to the database
+            }
+        }
+
+        // Functions that are called by the HTML buttons
+        window.checkTask = function(button, taskTime) {
+            const now = new Date();
+            const [hours, minutes] = taskTime.split(':').map(Number);
+            const dueTime = new Date();
+            dueTime.setHours(hours, minutes, 0, 0);
+
+            const taskCard = button.closest('.task-card');
+
+            if (now <= dueTime) {
+                button.textContent = '✅ Completed!';
+                button.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+                button.classList.add('bg-green-500', 'hover:bg-green-600');
+                points++;
+                completedTasks++; // Increment the counter for completed tasks
+                updatePointsDisplay();
+            } else {
+                button.textContent = '❌ Missed!';
+                button.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+                button.classList.add('bg-red-500', 'hover:bg-red-600');
+            }
+            
+            // Disable the button after it's clicked and add a completed class to the card
+            button.disabled = true;
+            taskCard.classList.add('completed', 'opacity-50', 'pointer-events-none');
+            
+            // Check for full completion after each task is marked
+            checkCompletion();
+        }
+
+        window.addTask = function() {
+            const taskName = taskSelect.value;
+            const hour = parseInt(taskHourInput.value, 10);
+            const minute = parseInt(taskMinuteInput.value, 10);
+            const ampm = taskAmpmSelect.value;
+            const kidName = kidNameInput.value.trim();
+
+            // Check if all inputs have been selected and are valid numbers
+            if (!kidName || !taskName || isNaN(hour) || isNaN(minute) || !ampm || hour < 1 || hour > 12 || minute < 0 || minute > 59) {
+                errorMessage.textContent = 'Please enter a name, select a task, and enter a valid time (e.g., Hour: 8, Minute: 30, AM).';
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+
+            // If everything is selected, hide the error message.
+            errorMessage.classList.add('hidden');
+
+            // Convert 12-hour time to 24-hour time for the checkTask function
+            let hours24 = hour;
+            if (ampm === 'PM' && hours24 < 12) {
+                hours24 += 12;
+            }
+            if (ampm === 'AM' && hours24 === 12) {
+                hours24 = 0;
+            }
+            const taskTime = `${String(hours24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+            const imageUrl = taskImages[taskName] || 'https://placehold.co/200x200/cccccc/FFFFFF?text=Task';
+
+            const taskCard = document.createElement('div');
+            taskCard.className = 'task-card bg-white rounded-2xl p-6 shadow-xl flex flex-col items-center relative transition-all duration-300';
+            taskCard.setAttribute('data-time', taskTime); // Add the data-time attribute for sorting
+            taskCard.innerHTML = `
+                <button onclick="showDeleteDialog(this)" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <div class="absolute top-4 right-10 text-sm font-medium bg-gray-100 text-gray-600 px-3 py-1 rounded-full">${hour}:${String(minute).padStart(2, '0')} ${ampm}</div>
+                <img src="${imageUrl}" alt="${taskName}" class="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full mb-4 shadow-sm">
+                <h3 class="text-xl font-bold text-gray-800 mb-2 text-center">${kidName} - ${taskName}</h3>
+                <button class="task-button w-full px-6 py-3 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-lg" onclick="checkTask(this, '${taskTime}')">Complete</button>
+            `;
+            
+            // Append the new card to the container, then sort all cards
+            tasksContainer.appendChild(taskCard);
+            
+            const allCards = Array.from(tasksContainer.children);
+            allCards.sort((a, b) => {
+                const timeA = a.getAttribute('data-time');
+                const timeB = b.getAttribute('data-time');
+                return timeA.localeCompare(timeB);
+            });
+
+            // Clear the container and re-append the sorted cards
+            tasksContainer.innerHTML = '';
+            allCards.forEach(card => tasksContainer.appendChild(card));
+
+            // Increment the total tasks count
+            totalTasks++;
+            
+            // Reset the form inputs for the next task, but keep the name
+            taskSelect.value = "";
+            taskHourInput.value = "";
+            taskMinuteInput.value = "";
+            taskAmpmSelect.value = "";
+        }
+
+        // Function to show the confirmation dialog
+        window.showDeleteDialog = function(button) {
+            taskToDelete = button.closest('.task-card');
+            confirmationDialog.classList.remove('hidden');
+        };
+
+        // Function to delete the task after confirmation
+        window.deleteTask = function() {
+            if (taskToDelete) {
+                // If the task was completed, decrement the completed tasks counter
+                if (taskToDelete.classList.contains('completed')) {
+                    completedTasks--;
+                }
+                
+                tasksContainer.removeChild(taskToDelete);
+                totalTasks--;
+                taskToDelete = null; // Clear the reference
+                confirmationDialog.classList.add('hidden');
+                checkCompletion(); // Check completion status again after a task is removed
+            }
+        };
+
+        // Event listener for the confirm delete button
+        confirmDeleteBtn.addEventListener('click', deleteTask);
+
+        // Event listener for the cancel delete button
+        cancelDeleteBtn.addEventListener('click', () => {
+            confirmationDialog.classList.add('hidden');
+            taskToDelete = null; // Clear the reference
+        });
+
+        // Function to clear all tasks from the list
+        window.clearTasks = function() {
+            tasksContainer.innerHTML = '';
+            totalTasks = 0;
+            completedTasks = 0;
+            successMessageContainer.classList.add('hidden');
+        }
+
+        // Function to reset the entire day without removing tasks
+        window.resetDay = function() {
+            // Find all task cards and reset their appearance
+            const taskCards = tasksContainer.querySelectorAll('.task-card');
+            taskCards.forEach(card => {
+                const button = card.querySelector('.task-button');
+                
+                // Reset button text and classes
+                button.textContent = 'Complete';
+                button.disabled = false;
+                button.classList.remove('bg-green-500', 'hover:bg-green-600', 'bg-red-500', 'hover:bg-red-600');
+                button.classList.add('bg-orange-500', 'hover:bg-orange-600');
+                
+                // Reset card opacity and pointer events
+                card.classList.remove('completed', 'opacity-50', 'pointer-events-none');
+            });
+
+            // Reset the points and completion counters
+            points = 0;
+            completedTasks = 0;
+            updatePointsDisplay();
+            successMessageContainer.classList.add('hidden');
+        }
+
+        // Functions to show and hide the sticker modal
+        window.showStickers = function() {
+            stickersGallery.innerHTML = ''; // Clear previous stickers
+            if (stickers.length === 0) {
+                stickersGallery.innerHTML = '<p class="text-gray-500 text-center">No stickers earned yet!</p>';
+            } else {
+                stickers.forEach(sticker => {
+                    const stickerElement = document.createElement('div');
+                    stickerElement.className = 'text-5xl';
+                    stickerElement.textContent = sticker;
+                    stickersGallery.appendChild(stickerElement);
+                });
+            }
+            stickerModal.classList.remove('hidden');
+        }
+
+        window.hideStickers = function() {
+            stickerModal.classList.add('hidden');
+        }
+        
+        // Function to clear all saved stickers
+        window.clearStickers = function() {
+            stickers = [];
+            saveStickers();
+            showStickers(); // Re-render the gallery
+        }
+        
+        // Initial setup on page load
+        window.onload = () => {
+            loadStickers();
+            updatePointsDisplay();
+        };
+    </script>
+</body>
+</html>

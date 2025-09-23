@@ -12,9 +12,6 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
-        .task-card:hover {
-            transform: scale(1.03);
-        }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col items-center p-6">
@@ -129,8 +126,6 @@
         const taskMinuteInput = document.getElementById('task-minute');
         const taskAmpmSelect = document.getElementById('task-ampm');
         
-      0gltiROHlif7Zl0OtXVKAXIXBP9CmXCAXStAKfoSGuU
-
         function updatePointsDisplay() {
             pointsDisplay.textContent = points;
         }
@@ -177,7 +172,7 @@
                 console.error("Error loading tasks from localStorage:", e);
             }
         }
-        
+
         // Render tasks from the tasks array
         function renderTasks() {
             tasksContainer.innerHTML = ''; // Clear existing tasks
@@ -270,28 +265,8 @@
             // Check for full completion after each task is marked
             checkCompletion();
         }
-        
-        // Function to fetch an image from Unsplash
-        async function fetchImage(query) {
-            // Unsplash API endpoint for a single random photo
-            const url = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&client_id=${UNSPLASH_ACCESS_KEY}`;
-            
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.urls && data.urls.regular) {
-                    return data.urls.regular; // Return the URL of the regular-sized image
-                }
-            } catch (error) {
-                console.error('Error fetching image from Unsplash:', error);
-            }
-            
-            // Fallback image if API call fails or no image is found
-            return 'https://placehold.co/200x200/cccccc/000000?text=Task+Icon';
-        }
 
-        window.addTask = async function() {
+        window.addTask = function() {
             const taskName = taskInput.value.trim();
             const hour = parseInt(taskHourInput.value, 10);
             const minute = parseInt(taskMinuteInput.value, 10);
@@ -304,18 +279,6 @@
                 errorMessage.classList.remove('hidden');
                 return;
             }
-            
-            // Show a loading state while fetching the image
-            const tempCard = document.createElement('div');
-            tempCard.className = 'task-card bg-white rounded-2xl p-6 shadow-xl flex flex-col items-center relative transition-all duration-300 animate-pulse';
-            tempCard.innerHTML = '<div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-200 mb-4"></div><p class="text-gray-500 font-bold">Loading Image...</p>';
-            tasksContainer.prepend(tempCard);
-
-            // Fetch the image URL for the task
-            const imageUrl = await fetchImage(taskName);
-            
-            // Remove the loading card
-            tempCard.remove();
 
             // If everything is selected, hide the error message.
             errorMessage.classList.add('hidden');
@@ -329,6 +292,8 @@
                 hours24 = 0;
             }
             const taskTime = `${String(hours24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+
+            const imageUrl = 'https://placehold.co/200x200/cccccc/FFFFFF?text=' + encodeURIComponent(taskName);
 
             // Create a new task object
             const newTask = {

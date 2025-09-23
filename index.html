@@ -47,7 +47,7 @@
         </div>
         <!-- Prominent error message now shown here -->
         <div id="error-message" class="hidden text-center mt-4 p-3 bg-red-100 text-red-700 rounded-lg font-bold shadow">
-            Please select a task and enter a valid time (e.g., Hour: 8, Minute: 30, AM).
+            Please enter a name, a task, and a valid time (e.g., Hour: 8, Minute: 30, AM).
         </div>
         <!-- Action buttons -->
         <div class="flex flex-col sm:flex-row justify-between mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
@@ -108,6 +108,7 @@
         let totalTasks = 0;
         let completedTasks = 0;
         let stickers = []; // Array to store earned stickers
+        let tasks = []; // Array to store tasks
         let taskToDelete = null; // To hold the task card element to be deleted
 
         const tasksContainer = document.getElementById('tasks-container');
@@ -151,6 +152,75 @@
             }
         }
 
+        // Save tasks to localStorage
+        function saveTasks() {
+            try {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            } catch (e) {
+                console.error("Error saving tasks to localStorage:", e);
+            }
+        }
+
+        // Load tasks from localStorage and render them
+        function loadTasks() {
+            try {
+                const storedTasks = localStorage.getItem('tasks');
+                if (storedTasks) {
+                    tasks = JSON.parse(storedTasks);
+                    renderTasks();
+                }
+            } catch (e) {
+                console.error("Error loading tasks from localStorage:", e);
+            }
+        }
+
+        // Render tasks from the tasks array
+        function renderTasks() {
+            tasksContainer.innerHTML = ''; // Clear existing tasks
+            tasks.sort((a, b) => a.taskTime.localeCompare(b.taskTime)); // Sort by time
+
+            totalTasks = tasks.length;
+            completedTasks = tasks.filter(task => task.isCompleted).length;
+            updatePointsDisplay();
+
+            tasks.forEach((task, index) => {
+                const taskCard = document.createElement('div');
+                const timeParts = task.taskTime.split(':');
+                let hour12 = parseInt(timeParts[0], 10);
+                let ampm = 'AM';
+                if (hour12 >= 12) {
+                    ampm = 'PM';
+                    if (hour12 > 12) hour12 -= 12;
+                }
+                if (hour12 === 0) hour12 = 12; // 00:xx should be 12:xx AM
+
+                taskCard.className = `task-card bg-white rounded-2xl p-6 shadow-xl flex flex-col items-center relative transition-all duration-300 ${task.isCompleted ? 'completed opacity-50 pointer-events-none' : ''}`;
+                taskCard.setAttribute('data-time', task.taskTime);
+                taskCard.setAttribute('data-index', index);
+                
+                let buttonText = 'Complete';
+                let buttonClasses = 'bg-orange-500 hover:bg-orange-600';
+                if (task.isCompleted) {
+                    buttonText = '✅ Completed!';
+                    buttonClasses = 'bg-green-500 hover:bg-green-600';
+                }
+
+                taskCard.innerHTML = `
+                    <button onclick="showDeleteDialog(this)" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <div class="absolute top-4 right-10 text-sm font-medium bg-gray-100 text-gray-600 px-3 py-1 rounded-full">${hour12}:${timeParts[1]} ${ampm}</div>
+                    <img src="${task.imageUrl}" alt="${task.taskName}" class="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full mb-4 shadow-sm">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2 text-center">${task.kidName} - ${task.taskName}</h3>
+                    <button class="task-button w-full px-6 py-3 text-white rounded-xl font-bold transition-colors shadow-lg ${buttonClasses}" onclick="checkTask(this, '${task.taskTime}', ${index})" ${task.isCompleted ? 'disabled' : ''}>${buttonText}</button>
+                `;
+                tasksContainer.appendChild(taskCard);
+            });
+            checkCompletion();
+        }
+
         // Checks if all tasks have been completed on time and displays a message
         function checkCompletion() {
             // Only check for completion if there are tasks and all have been clicked
@@ -158,11 +228,13 @@
                 successMessageContainer.classList.remove('hidden');
                 stickers.push('✨'); // Add a new sticker
                 saveStickers(); // Save the new sticker to the database
+            } else {
+                 successMessageContainer.classList.add('hidden');
             }
         }
 
         // Functions that are called by the HTML buttons
-        window.checkTask = function(button, taskTime) {
+        window.checkTask = function(button, taskTime, index) {
             const now = new Date();
             const [hours, minutes] = taskTime.split(':').map(Number);
             const dueTime = new Date();
@@ -183,6 +255,10 @@
                 button.classList.add('bg-red-500', 'hover:bg-red-600');
             }
             
+            // Update task status in the data array and save
+            tasks[index].isCompleted = true;
+            saveTasks();
+
             // Disable the button after it's clicked and add a completed class to the card
             button.disabled = true;
             taskCard.classList.add('completed', 'opacity-50', 'pointer-events-none');
@@ -220,38 +296,20 @@
 
             const imageUrl = 'https://placehold.co/200x200/cccccc/FFFFFF?text=' + encodeURIComponent(taskName);
 
-            const taskCard = document.createElement('div');
-            taskCard.className = 'task-card bg-white rounded-2xl p-6 shadow-xl flex flex-col items-center relative transition-all duration-300';
-            taskCard.setAttribute('data-time', taskTime); // Add the data-time attribute for sorting
-            taskCard.innerHTML = `
-                <button onclick="showDeleteDialog(this)" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-                <div class="absolute top-4 right-10 text-sm font-medium bg-gray-100 text-gray-600 px-3 py-1 rounded-full">${hour}:${String(minute).padStart(2, '0')} ${ampm}</div>
-                <img src="${imageUrl}" alt="${taskName}" class="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full mb-4 shadow-sm">
-                <h3 class="text-xl font-bold text-gray-800 mb-2 text-center">${kidName} - ${taskName}</h3>
-                <button class="task-button w-full px-6 py-3 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-lg" onclick="checkTask(this, '${taskTime}')">Complete</button>
-            `;
+            // Create a new task object
+            const newTask = {
+                kidName,
+                taskName,
+                taskTime,
+                imageUrl,
+                isCompleted: false
+            };
             
-            // Append the new card to the container, then sort all cards
-            tasksContainer.appendChild(taskCard);
-            
-            const allCards = Array.from(tasksContainer.children);
-            allCards.sort((a, b) => {
-                const timeA = a.getAttribute('data-time');
-                const timeB = b.getAttribute('data-time');
-                return timeA.localeCompare(timeB);
-            });
+            // Add the new task to the array and save
+            tasks.push(newTask);
+            saveTasks();
+            renderTasks(); // Re-render all tasks from the updated array
 
-            // Clear the container and re-append the sorted cards
-            tasksContainer.innerHTML = '';
-            allCards.forEach(card => tasksContainer.appendChild(card));
-
-            // Increment the total tasks count
-            totalTasks++;
-            
             // Reset the form inputs for the next task, but keep the name
             taskInput.value = "";
             taskHourInput.value = "";
@@ -268,16 +326,16 @@
         // Function to delete the task after confirmation
         window.deleteTask = function() {
             if (taskToDelete) {
-                // If the task was completed, decrement the completed tasks counter
-                if (taskToDelete.classList.contains('completed')) {
-                    completedTasks--;
-                }
+                const index = parseInt(taskToDelete.getAttribute('data-index'), 10);
                 
-                tasksContainer.removeChild(taskToDelete);
-                totalTasks--;
+                // Remove the task from the tasks array
+                tasks.splice(index, 1);
+                
+                saveTasks(); // Save the updated tasks array
+                renderTasks(); // Re-render the tasks
+                
                 taskToDelete = null; // Clear the reference
                 confirmationDialog.classList.add('hidden');
-                checkCompletion(); // Check completion status again after a task is removed
             }
         };
 
@@ -292,33 +350,19 @@
 
         // Function to clear all tasks from the list
         window.clearTasks = function() {
-            tasksContainer.innerHTML = '';
-            totalTasks = 0;
-            completedTasks = 0;
+            tasks = [];
+            points = 0;
+            saveTasks();
+            renderTasks();
             successMessageContainer.classList.add('hidden');
         }
 
         // Function to reset the entire day without removing tasks
         window.resetDay = function() {
-            // Find all task cards and reset their appearance
-            const taskCards = tasksContainer.querySelectorAll('.task-card');
-            taskCards.forEach(card => {
-                const button = card.querySelector('.task-button');
-                
-                // Reset button text and classes
-                button.textContent = 'Complete';
-                button.disabled = false;
-                button.classList.remove('bg-green-500', 'hover:bg-green-600', 'bg-red-500', 'hover:bg-red-600');
-                button.classList.add('bg-orange-500', 'hover:bg-orange-600');
-                
-                // Reset card opacity and pointer events
-                card.classList.remove('completed', 'opacity-50', 'pointer-events-none');
-            });
-
-            // Reset the points and completion counters
+            tasks.forEach(task => task.isCompleted = false);
             points = 0;
-            completedTasks = 0;
-            updatePointsDisplay();
+            saveTasks();
+            renderTasks();
             successMessageContainer.classList.add('hidden');
         }
 
@@ -352,6 +396,7 @@
         // Initial setup on page load
         window.onload = () => {
             loadStickers();
+            loadTasks();
             updatePointsDisplay();
         };
     </script>

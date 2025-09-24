@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="icon" type="image/png" href="/Kr.png">
+<link rel="icon" type="image/png" href="/Kr.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Routine Tracker</title>
+    <title>Kids Routine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
@@ -18,17 +18,23 @@
 <body class="bg-gray-50 min-h-screen flex flex-col items-center p-6">
 
     <!-- Header and Points Display -->
-    <header class="w-full max-w-2xl text-center mb-8">
-        <h1 class="text-4xl sm:text-5xl font-bold text-blue-700 mb-2">My Routine Tracker</h1>
+    <!-- The main content has an explicit z-index to make sure pop-ups appear on top -->
+    <header class="w-full max-w-2xl text-center mb-8 relative z-0">
+        <h1 class="text-4xl sm:text-5xl font-bold text-blue-700 mb-2">Kids Routine</h1>
         <p class="text-xl text-green-600 font-semibold rounded-full bg-green-100 py-2 px-4 inline-block shadow-sm">
             Points: <span id="current-points">0</span>
         </p>
     </header>
 
+    <!-- Separate Kid Name Section -->
+    <div class="w-full max-w-lg bg-white p-6 rounded-2xl shadow-lg mb-8 relative z-0">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Kid's Name</h2>
+        <input type="text" id="kid-name" placeholder="Enter name" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+    </div>
+
     <!-- Add Task Section -->
-    <div class="w-full max-w-lg bg-white p-6 rounded-2xl shadow-lg mb-8">
+    <div class="w-full max-w-lg bg-white p-6 rounded-2xl shadow-lg mb-8 relative z-0">
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Add a Task</h2>
-        <input type="text" id="kid-name" placeholder="Enter name" class="w-full p-3 mb-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
         <input type="text" id="task-input" placeholder="Enter a task name" class="w-full p-3 mb-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:focus:border-blue-500 transition-colors">
         <div class="flex flex-col sm:flex-col gap-4 items-center mt-4">
             <!-- Simplified time inputs -->
@@ -54,7 +60,7 @@
             <button onclick="resetDay()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">
                 Restart Day
             </button>
-            <button onclick="clearTasks()" class="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-xl font-bold hover:bg-yellow-600 transition-colors">
+            <button onclick="showClearAllConfirmation()" class="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-xl font-bold hover:bg-yellow-600 transition-colors">
                 Clear All Tasks
             </button>
             <button onclick="showStickers()" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors">
@@ -64,29 +70,41 @@
     </div>
     
     <!-- Success message container -->
-    <div id="success-message-container" class="w-full max-w-xl text-center hidden mb-8">
+    <div id="success-message-container" class="w-full max-w-xl text-center hidden mb-8 relative z-0">
         <div class="p-6 bg-yellow-200 rounded-2xl shadow-xl border-4 border-yellow-400">
             <p class="text-3xl font-bold text-yellow-800 animate-pulse">🎉 Woohoo!</p>
             <p class="text-xl text-yellow-700 mt-2">All tasks completed! Here's a virtual sticker. ✨</p>
         </div>
     </div>
 
+    <!-- Special prize message container -->
+    <div id="prize-message-container" class="w-full max-w-xl text-center hidden mb-8 relative z-0">
+        <div class="p-6 bg-green-200 rounded-2xl shadow-xl border-4 border-green-400">
+            <p class="text-3xl font-bold text-green-800 animate-pulse">🏆 CONGRATULATIONS!</p>
+            <p class="text-xl text-green-700 mt-2">You've reached a new prize milestone! 🥇</p>
+            <button onclick="hidePrizeMessage()" class="mt-4 px-6 py-2 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors">Got It!</button>
+        </div>
+    </div>
+
+
     <!-- Sticker Modal -->
-    <div id="sticker-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+    <!-- This pop-up must be on top of all other elements, so it gets a high z-index. -->
+    <div id="sticker-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
         <div class="bg-white p-8 rounded-2xl shadow-2xl relative w-11/12 max-w-md">
             <button onclick="hideStickers()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold">&times;</button>
-            <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Your Stickers</h3>
+            <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center flex items-center justify-center gap-2">
+                Your Stickers 
+                <span id="sticker-count" class="text-lg font-normal text-gray-500">(0)</span>
+            </h3>
             <div id="stickers-gallery" class="flex flex-wrap justify-center gap-4 p-4 min-h-[100px] border border-gray-200 rounded-xl">
                 <!-- Stickers will be added here -->
             </div>
-            <button onclick="clearStickers()" class="mt-4 w-full px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">
-                Clear Stickers
-            </button>
         </div>
     </div>
     
-    <!-- Confirmation Dialog -->
-    <div id="confirmation-dialog" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+    <!-- Confirmation Dialog for deleting a single task -->
+    <!-- This pop-up must also be on top of all other elements. -->
+    <div id="confirmation-dialog" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-11/12 max-w-sm text-center">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Are you sure you want to delete this task?</h3>
             <p class="text-gray-600 mb-6">This action cannot be undone.</p>
@@ -97,29 +115,51 @@
         </div>
     </div>
 
+    <!-- Confirmation Dialog for clearing all data -->
+    <div id="clear-all-confirmation-dialog" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-11/12 max-w-sm text-center">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Are you sure you want to clear ALL data?</h3>
+            <p class="text-gray-600 mb-6">This will reset all tasks, points, and stickers. This action cannot be undone.</p>
+            <div class="flex justify-around space-x-4">
+                <button id="confirm-clear-all-btn" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">Yes, Clear All</button>
+                <button id="cancel-clear-all-btn" class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-xl font-bold hover:bg-gray-500 transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Tasks Container -->
-    <div id="tasks-container" class="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div id="tasks-container" class="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-0">
         <!-- Tasks will be added here by JavaScript -->
     </div>
 
     <script>
         // Global variables and DOM elements
+        const UNSPLASH_API_KEY = '0gltiROHlif7Zl0OtXVKAXIXBP9CmXCAXStAKfoSGuU';
         let points = 0;
         let totalTasks = 0;
         let completedTasks = 0;
         let stickers = []; // Array to store earned stickers
         let tasks = []; // Array to store tasks
         let taskToDelete = null; // To hold the task card element to be deleted
+        let lastStickerPrizeLevel = 0; // Tracks the last sticker milestone a prize was awarded for
+        let lastPointPrizeLevel = 0; // Tracks the last point milestone a prize was awarded for
 
         const tasksContainer = document.getElementById('tasks-container');
         const pointsDisplay = document.getElementById('current-points');
         const errorMessage = document.getElementById('error-message');
         const successMessageContainer = document.getElementById('success-message-container');
+        const prizeMessageContainer = document.getElementById('prize-message-container');
         const stickerModal = document.getElementById('sticker-modal');
         const stickersGallery = document.getElementById('stickers-gallery');
+        const stickerCountDisplay = document.getElementById('sticker-count');
         const confirmationDialog = document.getElementById('confirmation-dialog');
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        const clearAllConfirmationDialog = document.getElementById('clear-all-confirmation-dialog');
+        const confirmClearAllBtn = document.getElementById('confirm-clear-all-btn');
+        const cancelClearAllBtn = document = document.getElementById('cancel-clear-all-btn');
+
 
         const kidNameInput = document.getElementById('kid-name');
         const taskInput = document.getElementById('task-input');
@@ -129,6 +169,11 @@
         
         function updatePointsDisplay() {
             pointsDisplay.textContent = points;
+        }
+
+        // Function to hide the prize message
+        window.hidePrizeMessage = function() {
+            prizeMessageContainer.classList.add('hidden');
         }
         
         // Save stickers to localStorage
@@ -213,7 +258,7 @@
                     </button>
                     <div class="absolute top-4 right-10 text-sm font-medium bg-gray-100 text-gray-600 px-3 py-1 rounded-full">${hour12}:${timeParts[1]} ${ampm}</div>
                     <img src="${task.imageUrl}" alt="${task.taskName}" class="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full mb-4 shadow-sm">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2 text-center">${task.kidName} - ${task.taskName}</h3>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2 text-center">${task.taskName}</h3>
                     <button class="task-button w-full px-6 py-3 text-white rounded-xl font-bold transition-colors shadow-lg ${buttonClasses}" onclick="checkTask(this, '${task.taskTime}', ${index})" ${task.isCompleted ? 'disabled' : ''}>${buttonText}</button>
                 `;
                 tasksContainer.appendChild(taskCard);
@@ -228,6 +273,11 @@
                 successMessageContainer.classList.remove('hidden');
                 stickers.push('✨'); // Add a new sticker
                 saveStickers(); // Save the new sticker to the database
+                 // Check if the number of stickers is a multiple of 5 and a new prize should be awarded
+                if (stickers.length > 0 && stickers.length % 5 === 0 && stickers.length !== lastStickerPrizeLevel) {
+                    prizeMessageContainer.classList.remove('hidden');
+                    lastStickerPrizeLevel = stickers.length;
+                }
             } else {
                  successMessageContainer.classList.add('hidden');
             }
@@ -249,6 +299,14 @@
                 points++;
                 completedTasks++; // Increment the counter for completed tasks
                 updatePointsDisplay();
+
+                // Check for new point milestone
+                if (points > 0 && points % 20 === 0 && points !== lastPointPrizeLevel) {
+                    prizeMessageContainer.classList.remove('hidden');
+                    stickers.push('⭐'); // Award a new sticker for the points milestone
+                    saveStickers(); // Save the new sticker
+                    lastPointPrizeLevel = points;
+                }
             } else {
                 button.textContent = '❌ Missed!';
                 button.classList.remove('bg-orange-500', 'hover:bg-orange-600');
@@ -267,7 +325,7 @@
             checkCompletion();
         }
 
-        window.addTask = function() {
+        window.addTask = async function() {
             const taskName = taskInput.value.trim();
             const hour = parseInt(taskHourInput.value, 10);
             const minute = parseInt(taskMinuteInput.value, 10);
@@ -293,8 +351,18 @@
                 hours24 = 0;
             }
             const taskTime = `${String(hours24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+            
+            let imageUrl = 'https://placehold.co/200x200/cccccc/FFFFFF?text=' + encodeURIComponent(taskName);
 
-            const imageUrl = 'https://placehold.co/200x200/cccccc/FFFFFF?text=' + encodeURIComponent(taskName);
+            try {
+                const response = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(taskName)}&client_id=${UNSPLASH_API_KEY}&per_page=1`);
+                const data = await response.json();
+                if (data.results && data.results.length > 0) {
+                    imageUrl = data.results[0].urls.small;
+                }
+            } catch (error) {
+                console.error('Error fetching image from Unsplash:', error);
+            }
 
             // Create a new task object
             const newTask = {
@@ -331,8 +399,10 @@
                 // Remove the task from the tasks array
                 tasks.splice(index, 1);
                 
+                // Update the indices of all tasks in the DOM
+                renderTasks();
+                
                 saveTasks(); // Save the updated tasks array
-                renderTasks(); // Re-render the tasks
                 
                 taskToDelete = null; // Clear the reference
                 confirmationDialog.classList.add('hidden');
@@ -348,27 +418,49 @@
             taskToDelete = null; // Clear the reference
         });
 
-        // Function to clear all tasks from the list
-        window.clearTasks = function() {
+        // Function to show the clear all confirmation dialog
+        window.showClearAllConfirmation = function() {
+            clearAllConfirmationDialog.classList.remove('hidden');
+        };
+        
+        // Function to perform the clear all action after confirmation
+        function performClearAllTasks() {
             tasks = [];
             points = 0;
+            lastStickerPrizeLevel = 0;
+            lastPointPrizeLevel = 0;
+            stickers = [];
             saveTasks();
+            saveStickers();
             renderTasks();
             successMessageContainer.classList.add('hidden');
+            prizeMessageContainer.classList.add('hidden');
+            clearAllConfirmationDialog.classList.add('hidden');
         }
+
+        // Event listener for the confirm clear all button
+        confirmClearAllBtn.addEventListener('click', performClearAllTasks);
+
+        // Event listener for the cancel clear all button
+        cancelClearAllBtn.addEventListener('click', () => {
+            clearAllConfirmationDialog.classList.add('hidden');
+        });
 
         // Function to reset the entire day without removing tasks
         window.resetDay = function() {
             tasks.forEach(task => task.isCompleted = false);
-            points = 0;
+            // Points and lastStickerPrizeLevel are NOT reset here, as per user request
             saveTasks();
             renderTasks();
             successMessageContainer.classList.add('hidden');
+            prizeMessageContainer.classList.add('hidden');
         }
 
         // Functions to show and hide the sticker modal
         window.showStickers = function() {
             stickersGallery.innerHTML = ''; // Clear previous stickers
+            stickerCountDisplay.textContent = `(${stickers.length})`;
+            
             if (stickers.length === 0) {
                 stickersGallery.innerHTML = '<p class="text-gray-500 text-center">No stickers earned yet!</p>';
             } else {
@@ -384,13 +476,6 @@
 
         window.hideStickers = function() {
             stickerModal.classList.add('hidden');
-        }
-        
-        // Function to clear all saved stickers
-        window.clearStickers = function() {
-            stickers = [];
-            saveStickers();
-            showStickers(); // Re-render the gallery
         }
         
         // Initial setup on page load

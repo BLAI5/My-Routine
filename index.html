@@ -26,10 +26,23 @@
         </p>
     </header>
 
-    <!-- Separate Kid Name Section -->
+    <!-- Profile Selection Section -->
     <div class="w-full max-w-lg bg-white p-6 rounded-2xl shadow-lg mb-8 relative z-0">
-        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Kid's Name</h2>
-        <input type="text" id="kid-name" placeholder="Enter name" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Select a Profile</h2>
+        <div class="flex flex-col sm:flex-row gap-4 items-center">
+            <select id="profile-select" class="flex-1 w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                <option value="">Select a profile</option>
+            </select>
+            <button onclick="loadProfile()" class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg">Load Profile</button>
+        </div>
+        <div class="mt-6">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Or Create a New Profile</h2>
+            <div class="flex flex-col sm:flex-row gap-4 items-center">
+                <input type="text" id="new-profile-input" placeholder="Enter new profile name" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                <button onclick="addProfile()" class="w-full sm:w-auto px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors shadow-lg">Add Profile</button>
+            </div>
+        </div>
+        <div id="profile-error-message" class="hidden text-center mt-4 p-3 bg-red-100 text-red-700 rounded-lg font-bold shadow"></div>
     </div>
 
     <!-- Add Task Section -->
@@ -76,7 +89,7 @@
     <div id="success-message-container" class="w-full max-w-xl text-center hidden mb-8 relative z-0">
         <div class="p-6 bg-yellow-200 rounded-2xl shadow-xl border-4 border-yellow-400">
             <p class="text-3xl font-bold text-yellow-800 animate-pulse">🎉 Woohoo!</p>
-            <p class="text-xl text-yellow-700 mt-2">All tasks completed! Here's a virtual sticker. ✨</p>
+            <p class="text-xl text-yellow-700 mt-2">All tasks completed! You earned a sticker! ✨</p>
         </div>
     </div>
 
@@ -151,15 +164,15 @@
     <script>
         // Global variables and DOM elements
         const UNSPLASH_API_KEY = '0gltiROHlif7Zl0OtXVKAXIXBP9CmXCAXStAKfoSGuU';
+        let currentProfile = null;
+        let profiles = {}; // Stores all profile data
         let points = 0;
+        let tasks = []; // Array to store tasks for the current profile
+        let stickers = []; // Array to store earned stickers for the current profile
         let totalTasks = 0;
         let completedTasks = 0;
-        let stickers = []; // Array to store earned stickers
-        let tasks = []; // Array to store tasks
-        let taskToDelete = null; // To hold the task card element to be deleted
-        let lastStickerPrizeLevel = 0; // Tracks the last sticker milestone a prize was awarded for
-        let lastPointPrizeLevel = 0; // Tracks the last point milestone a prize was awarded for
-
+        let taskToDelete = null; 
+        
         const tasksContainer = document.getElementById('tasks-container');
         const pointsDisplay = document.getElementById('current-points');
         const errorMessage = document.getElementById('error-message');
@@ -173,74 +186,101 @@
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
         const clearAllConfirmationDialog = document.getElementById('clear-all-confirmation-dialog');
         const confirmClearAllBtn = document.getElementById('confirm-clear-all-btn');
-        const cancelClearAllBtn = document = document.getElementById('cancel-clear-all-btn');
+        const cancelClearAllBtn = document.getElementById('cancel-clear-all-btn');
         const clearRewardsConfirmationDialog = document.getElementById('clear-rewards-confirmation-dialog');
         const confirmClearRewardsBtn = document.getElementById('confirm-clear-rewards-btn');
         const cancelClearRewardsBtn = document.getElementById('cancel-clear-rewards-btn');
 
-
-        const kidNameInput = document.getElementById('kid-name');
+        const profileSelect = document.getElementById('profile-select');
+        const newProfileInput = document.getElementById('new-profile-input');
+        const profileErrorMessage = document.getElementById('profile-error-message');
         const taskInput = document.getElementById('task-input');
         const taskHourInput = document.getElementById('task-hour');
         const taskMinuteInput = document.getElementById('task-minute');
         const taskAmpmSelect = document.getElementById('task-ampm');
         
+        // List of queries to make the stickers more random
+        const stickerQueries = [
+            'cute animals',
+            'cartoon characters',
+            'happy smiles',
+            'space',
+            'colorful patterns',
+            'playful illustrations',
+            'funny doodles',
+            'fantasy creatures',
+            'food illustrations',
+            'nature stickers'
+        ];
+
+        function getRandomStickerQuery() {
+            const randomIndex = Math.floor(Math.random() * stickerQueries.length);
+            return stickerQueries[randomIndex];
+        }
+
+        // --- Core Data Management ---
+        function saveProfiles() {
+            try {
+                localStorage.setItem('kidsRoutineProfiles', JSON.stringify(profiles));
+            } catch (e) {
+                console.error("Error saving profiles to localStorage:", e);
+            }
+        }
+        
+        function loadProfiles() {
+            try {
+                const storedProfiles = localStorage.getItem('kidsRoutineProfiles');
+                if (storedProfiles) {
+                    profiles = JSON.parse(storedProfiles);
+                }
+            } catch (e) {
+                console.error("Error loading profiles from localStorage:", e);
+            }
+        }
+
+        function populateProfileDropdown() {
+            profileSelect.innerHTML = '<option value="">Select a profile</option>';
+            const profileNames = Object.keys(profiles).sort();
+            profileNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                profileSelect.appendChild(option);
+            });
+        }
+        
+        function saveCurrentProfileData() {
+            if (currentProfile) {
+                profiles[currentProfile].points = points;
+                profiles[currentProfile].tasks = tasks;
+                profiles[currentProfile].stickers = stickers;
+                saveProfiles();
+            }
+        }
+
+        function loadCurrentProfileData() {
+            if (currentProfile && profiles[currentProfile]) {
+                const data = profiles[currentProfile];
+                points = data.points || 0;
+                tasks = data.tasks || [];
+                stickers = data.stickers || [];
+                updatePointsDisplay();
+                renderTasks();
+            }
+        }
+
+        // --- UI Update and Rendering ---
         function updatePointsDisplay() {
             pointsDisplay.textContent = points;
         }
 
-        // Function to hide the prize message
         window.hidePrizeMessage = function() {
             prizeMessageContainer.classList.add('hidden');
         }
         
-        // Save stickers to localStorage
-        function saveStickers() {
-            try {
-                localStorage.setItem('stickers', JSON.stringify(stickers));
-            } catch (e) {
-                console.error("Error saving stickers to localStorage:", e);
-            }
-        }
-        
-        // Load stickers from localStorage
-        function loadStickers() {
-            try {
-                const storedStickers = localStorage.getItem('stickers');
-                if (storedStickers) {
-                    stickers = JSON.parse(storedStickers);
-                }
-            } catch (e) {
-                console.error("Error loading stickers from localStorage:", e);
-            }
-        }
-
-        // Save tasks to localStorage
-        function saveTasks() {
-            try {
-                localStorage.setItem('tasks', JSON.stringify(tasks));
-            } catch (e) {
-                console.error("Error saving tasks to localStorage:", e);
-            }
-        }
-
-        // Load tasks from localStorage and render them
-        function loadTasks() {
-            try {
-                const storedTasks = localStorage.getItem('tasks');
-                if (storedTasks) {
-                    tasks = JSON.parse(storedTasks);
-                    renderTasks();
-                }
-            } catch (e) {
-                console.error("Error loading tasks from localStorage:", e);
-            }
-        }
-
-        // Render tasks from the tasks array
         function renderTasks() {
-            tasksContainer.innerHTML = ''; // Clear existing tasks
-            tasks.sort((a, b) => a.taskTime.localeCompare(b.taskTime)); // Sort by time
+            tasksContainer.innerHTML = '';
+            tasks.sort((a, b) => a.taskTime.localeCompare(b.taskTime));
 
             totalTasks = tasks.length;
             completedTasks = tasks.filter(task => task.isCompleted).length;
@@ -255,7 +295,7 @@
                     ampm = 'PM';
                     if (hour12 > 12) hour12 -= 12;
                 }
-                if (hour12 === 0) hour12 = 12; // 00:xx should be 12:xx AM
+                if (hour12 === 0) hour12 = 12;
 
                 taskCard.className = `task-card bg-white rounded-2xl p-6 shadow-xl flex flex-col items-center relative transition-all duration-300 ${task.isCompleted ? 'completed opacity-50 pointer-events-none' : ''}`;
                 taskCard.setAttribute('data-time', task.taskTime);
@@ -284,25 +324,74 @@
             checkCompletion();
         }
 
-        // Checks if all tasks have been completed on time and displays a message
-        function checkCompletion() {
-            // Only check for completion if there are tasks and all have been clicked
+        async function getStickerImage(query) {
+            try {
+                const response = await fetch(`https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&client_id=${UNSPLASH_API_KEY}&count=1`);
+                const data = await response.json();
+                if (data && data.length > 0) {
+                    return data[0].urls.small;
+                }
+            } catch (error) {
+                console.error('Error fetching sticker image from Unsplash:', error);
+            }
+            return 'https://placehold.co/100x100/A855F7/FFFFFF?text=Sticker';
+        }
+
+        async function checkCompletion() {
             if (totalTasks > 0 && completedTasks === totalTasks) {
                 successMessageContainer.classList.remove('hidden');
-                stickers.push('✨'); // Add a new sticker
-                saveStickers(); // Save the new sticker to the database
-                 // Check if the number of stickers is a multiple of 5 and a new prize should be awarded
+                
+                // Fetch a new random sticker image for completing all tasks
+                const newStickerUrl = await getStickerImage(getRandomStickerQuery());
+                stickers.push(newStickerUrl);
+                
+                saveCurrentProfileData();
+                const lastStickerPrizeLevel = profiles[currentProfile].lastStickerPrizeLevel || 0;
                 if (stickers.length > 0 && stickers.length % 5 === 0 && stickers.length !== lastStickerPrizeLevel) {
                     prizeMessageContainer.classList.remove('hidden');
-                    lastStickerPrizeLevel = stickers.length;
+                    profiles[currentProfile].lastStickerPrizeLevel = stickers.length;
                 }
             } else {
                  successMessageContainer.classList.add('hidden');
             }
         }
 
-        // Functions that are called by the HTML buttons
-        window.checkTask = function(button, taskTime, index) {
+        // --- Event Handlers ---
+        window.loadProfile = function() {
+            const selectedProfile = profileSelect.value;
+            if (selectedProfile) {
+                currentProfile = selectedProfile;
+                loadCurrentProfileData();
+                profileErrorMessage.classList.add('hidden');
+            } else {
+                profileErrorMessage.textContent = 'Please select a profile to load.';
+                profileErrorMessage.classList.remove('hidden');
+            }
+        }
+
+        window.addProfile = function() {
+            const newName = newProfileInput.value.trim();
+            if (!newName) {
+                profileErrorMessage.textContent = 'Please enter a name for the new profile.';
+                profileErrorMessage.classList.remove('hidden');
+                return;
+            }
+            if (profiles[newName]) {
+                profileErrorMessage.textContent = 'A profile with this name already exists.';
+                profileErrorMessage.classList.remove('hidden');
+                return;
+            }
+            profiles[newName] = { points: 0, tasks: [], stickers: [], lastStickerPrizeLevel: 0, lastPointPrizeLevel: 0 };
+            saveProfiles();
+            populateProfileDropdown();
+            newProfileInput.value = '';
+            profileSelect.value = newName;
+            currentProfile = newName;
+            loadCurrentProfileData();
+            profileErrorMessage.classList.add('hidden');
+        }
+
+        window.checkTask = async function(button, taskTime, index) {
             const now = new Date();
             const [hours, minutes] = taskTime.split(':').map(Number);
             const dueTime = new Date();
@@ -315,15 +404,18 @@
                 button.classList.remove('bg-orange-500', 'hover:bg-orange-600');
                 button.classList.add('bg-green-500', 'hover:bg-green-600');
                 points++;
-                completedTasks++; // Increment the counter for completed tasks
+                completedTasks++;
                 updatePointsDisplay();
 
-                // Check for new point milestone
+                const lastPointPrizeLevel = profiles[currentProfile].lastPointPrizeLevel || 0;
                 if (points > 0 && points % 20 === 0 && points !== lastPointPrizeLevel) {
                     prizeMessageContainer.classList.remove('hidden');
-                    stickers.push('⭐'); // Award a new sticker for the points milestone
-                    saveStickers(); // Save the new sticker
-                    lastPointPrizeLevel = points;
+                    
+                    // Fetch a new random sticker for the points milestone
+                    const newStickerUrl = await getStickerImage(getRandomStickerQuery());
+                    stickers.push(newStickerUrl);
+                    
+                    profiles[currentProfile].lastPointPrizeLevel = points;
                 }
             } else {
                 button.textContent = '❌ Missed!';
@@ -331,36 +423,35 @@
                 button.classList.add('bg-red-500', 'hover:bg-red-600');
             }
             
-            // Update task status in the data array and save
             tasks[index].isCompleted = true;
-            saveTasks();
+            saveCurrentProfileData();
 
-            // Disable the button after it's clicked and add a completed class to the card
             button.disabled = true;
             taskCard.classList.add('completed', 'opacity-50', 'pointer-events-none');
             
-            // Check for full completion after each task is marked
             checkCompletion();
         }
 
         window.addTask = async function() {
+            if (!currentProfile) {
+                profileErrorMessage.textContent = 'Please select or add a profile before adding a task.';
+                profileErrorMessage.classList.remove('hidden');
+                return;
+            }
+
             const taskName = taskInput.value.trim();
             const hour = parseInt(taskHourInput.value, 10);
             const minute = parseInt(taskMinuteInput.value, 10);
             const ampm = taskAmpmSelect.value;
-            const kidName = kidNameInput.value.trim();
-
-            // Check if all inputs have been selected and are valid numbers
-            if (!kidName || !taskName || isNaN(hour) || isNaN(minute) || !ampm || hour < 1 || hour > 12 || minute < 0 || minute > 59) {
+            
+            if (!taskName || isNaN(hour) || isNaN(minute) || !ampm || hour < 1 || hour > 12 || minute < 0 || minute > 59) {
                 errorMessage.textContent = 'Please enter a name, a task, and a valid time (e.g., Hour: 8, Minute: 30, AM).';
                 errorMessage.classList.remove('hidden');
                 return;
             }
 
-            // If everything is selected, hide the error message.
             errorMessage.classList.add('hidden');
 
-            // Convert 12-hour time to 24-hour time for the checkTask function
             let hours24 = hour;
             if (ampm === 'PM' && hours24 < 12) {
                 hours24 += 12;
@@ -382,138 +473,117 @@
                 console.error('Error fetching image from Unsplash:', error);
             }
 
-            // Create a new task object
             const newTask = {
-                kidName,
                 taskName,
                 taskTime,
                 imageUrl,
                 isCompleted: false
             };
             
-            // Add the new task to the array and save
             tasks.push(newTask);
-            saveTasks();
-            renderTasks(); // Re-render all tasks from the updated array
+            saveCurrentProfileData();
+            renderTasks();
 
-            // Reset the form inputs for the next task, but keep the name
             taskInput.value = "";
             taskHourInput.value = "";
             taskMinuteInput.value = "";
             taskAmpmSelect.value = "";
         }
 
-        // Function to show the confirmation dialog
+        // --- Confirmation Dialogs and Actions ---
         window.showDeleteDialog = function(button) {
             taskToDelete = button.closest('.task-card');
             confirmationDialog.classList.remove('hidden');
         };
 
-        // Function to delete the task after confirmation
         window.deleteTask = function() {
             if (taskToDelete) {
                 const index = parseInt(taskToDelete.getAttribute('data-index'), 10);
-                
-                // Remove the task from the tasks array
                 tasks.splice(index, 1);
-                
-                // Update the indices of all tasks in the DOM
                 renderTasks();
-                
-                saveTasks(); // Save the updated tasks array
-                
-                taskToDelete = null; // Clear the reference
+                saveCurrentProfileData();
+                taskToDelete = null;
                 confirmationDialog.classList.add('hidden');
             }
         };
-
-        // Event listener for the confirm delete button
         confirmDeleteBtn.addEventListener('click', deleteTask);
-
-        // Event listener for the cancel delete button
         cancelDeleteBtn.addEventListener('click', () => {
             confirmationDialog.classList.add('hidden');
-            taskToDelete = null; // Clear the reference
+            taskToDelete = null;
         });
 
-        // Function to show the clear all confirmation dialog
         window.showClearAllConfirmation = function() {
             clearAllConfirmationDialog.classList.remove('hidden');
         };
         
-        // Function to perform the clear all action after confirmation
         function performClearAllTasks() {
-            tasks = [];
-            points = 0;
-            lastStickerPrizeLevel = 0;
-            lastPointPrizeLevel = 0;
-            stickers = [];
-            saveTasks();
-            saveStickers();
-            renderTasks();
-            successMessageContainer.classList.add('hidden');
-            prizeMessageContainer.classList.add('hidden');
-            clearAllConfirmationDialog.classList.add('hidden');
+            if (currentProfile) {
+                profiles[currentProfile].tasks = [];
+                profiles[currentProfile].points = 0;
+                profiles[currentProfile].stickers = [];
+                profiles[currentProfile].lastStickerPrizeLevel = 0;
+                profiles[currentProfile].lastPointPrizeLevel = 0;
+                saveProfiles();
+                loadCurrentProfileData(); // Reload the current profile's empty state
+                successMessageContainer.classList.add('hidden');
+                prizeMessageContainer.classList.add('hidden');
+                clearAllConfirmationDialog.classList.add('hidden');
+            }
         }
-
-        // Event listener for the confirm clear all button
         confirmClearAllBtn.addEventListener('click', performClearAllTasks);
-
-        // Event listener for the cancel clear all button
         cancelClearAllBtn.addEventListener('click', () => {
             clearAllConfirmationDialog.classList.add('hidden');
         });
 
-        // Function to reset the entire day without removing tasks
         window.resetDay = function() {
-            tasks.forEach(task => task.isCompleted = false);
-            // Points and lastStickerPrizeLevel are NOT reset here, as per user request
-            saveTasks();
-            renderTasks();
-            successMessageContainer.classList.add('hidden');
-            prizeMessageContainer.classList.add('hidden');
+            if (currentProfile) {
+                tasks.forEach(task => task.isCompleted = false);
+                saveCurrentProfileData();
+                renderTasks();
+                successMessageContainer.classList.add('hidden');
+                prizeMessageContainer.classList.add('hidden');
+            }
         }
 
-        // Function to show the clear all rewards confirmation dialog
         window.showClearAllRewardsConfirmation = function() {
             clearRewardsConfirmationDialog.classList.remove('hidden');
         };
 
-        // Function to clear only the rewards after confirmation
         window.performClearAllRewards = function() {
-            points = 0;
-            stickers = [];
-            lastStickerPrizeLevel = 0;
-            lastPointPrizeLevel = 0;
-            saveStickers();
-            updatePointsDisplay();
-            renderTasks();
-            successMessageContainer.classList.add('hidden');
-            prizeMessageContainer.classList.add('hidden');
-            clearRewardsConfirmationDialog.classList.add('hidden');
+            if (currentProfile) {
+                points = 0;
+                stickers = [];
+                profiles[currentProfile].lastStickerPrizeLevel = 0;
+                profiles[currentProfile].lastPointPrizeLevel = 0;
+                saveCurrentProfileData();
+                updatePointsDisplay();
+                renderTasks();
+                successMessageContainer.classList.add('hidden');
+                prizeMessageContainer.classList.add('hidden');
+                clearRewardsConfirmationDialog.classList.add('hidden');
+            }
         }
-
-        // Event listener for the confirm clear rewards button
         confirmClearRewardsBtn.addEventListener('click', performClearAllRewards);
-
-        // Event listener for the cancel clear rewards button
         cancelClearRewardsBtn.addEventListener('click', () => {
             clearRewardsConfirmationDialog.classList.add('hidden');
         });
 
-
-        // Functions to show and hide the sticker modal
+        // --- Sticker Modal ---
         window.showStickers = function() {
-            stickersGallery.innerHTML = ''; // Clear previous stickers
+            stickersGallery.innerHTML = '';
             stickerCountDisplay.textContent = `(${stickers.length})`;
             
             if (stickers.length === 0) {
                 stickersGallery.innerHTML = '<p class="text-gray-500 text-center">No stickers earned yet!</p>';
             } else {
-                stickers.forEach(sticker => {
+                stickers.forEach(stickerUrl => {
                     const stickerElement = document.createElement('div');
-                    stickerElement.className = 'text-5xl';
-                    stickerElement.textContent = sticker;
+                    stickerElement.className = 'w-24 h-24 rounded-full overflow-hidden shadow-lg border-2 border-purple-500';
+                    const img = document.createElement('img');
+                    img.src = stickerUrl;
+                    img.alt = 'Sticker';
+                    img.className = 'w-full h-full object-cover';
+                    stickerElement.appendChild(img);
                     stickersGallery.appendChild(stickerElement);
                 });
             }
@@ -524,11 +594,17 @@
             stickerModal.classList.add('hidden');
         }
         
-        // Initial setup on page load
+        // --- Initialization ---
         window.onload = () => {
-            loadStickers();
-            loadTasks();
-            updatePointsDisplay();
+            loadProfiles();
+            populateProfileDropdown();
+            // Automatically select the first profile if one exists
+            const profileNames = Object.keys(profiles);
+            if (profileNames.length > 0) {
+                profileSelect.value = profileNames[0];
+                currentProfile = profileNames[0];
+                loadCurrentProfileData();
+            }
         };
     </script>
 </body>

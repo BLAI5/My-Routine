@@ -1,3 +1,5 @@
+Test
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,14 +39,27 @@
             transform: translateY(2px);
             box-shadow: 0 2px 0 0 #4a5568, 0 4px 0 0 #2d3748;
         }
+
+        /* NEW: Reward Modal Animation */
+        @keyframes pop-in {
+            0% { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+            80% { transform: scale(1.05) rotate(5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        .animate-pop-in {
+            animation: pop-in 0.4s ease-out forwards;
+        }
+        .emoji-spin {
+            animation: spin 1.5s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-6">
-
-    <!-- Main Container -->
     <div class="w-full max-w-4xl">
-
-        <!-- Header and Points Display (always visible) -->
         <header id="app-header" class="w-full text-center mb-8 relative z-0">
             <h1 class="text-5xl sm:text-6xl font-bold text-sky-800 mb-2 drop-shadow-lg">Kids Routine</h1>
             <p class="text-2xl text-lime-600 font-bold rounded-full bg-lime-200 py-2 px-6 inline-block shadow-md drop-shadow-md">
@@ -52,12 +67,10 @@
             </p>
         </header>
 
-        <!-- Profile Page -->
+        <!-- Profile Selection Page -->
         <div id="profile-page" class="page w-full flex flex-col items-center">
             <div class="w-full max-w-lg bg-yellow-200 p-8 rounded-[3rem] shadow-2xl mb-8 border-4 border-yellow-300">
                 <h2 class="text-4xl font-bold text-slate-800 mb-6 text-center drop-shadow-sm">Who's Ready?</h2>
-                
-                <!-- Profile Selection -->
                 <div class="mb-6">
                     <label for="profile-select" class="block text-slate-700 font-bold text-xl mb-2">Pick a Profile</label>
                     <div class="flex flex-col sm:flex-row gap-4 items-center">
@@ -67,23 +80,10 @@
                         <button onclick="loadProfile()" class="w-full sm:w-auto px-6 py-4 bg-blue-500 text-white rounded-3xl font-bold hover:bg-blue-600 transition-colors shadow-lg button-shadow">Go!</button>
                     </div>
                 </div>
-
-                <!-- Create New Profile -->
-                <div>
-                    <label for="new-profile-input" class="block text-slate-700 font-bold text-xl mb-2">Or, Make a New Friend!</label>
-                    <div class="flex flex-col sm:flex-row gap-4 items-center">
-                        <input type="text" id="new-profile-input" placeholder="Name your new profile" class="w-full p-4 border-4 border-green-400 rounded-3xl focus:ring-4 focus:ring-green-500 focus:border-green-500 bg-white transition-colors text-lg">
-                        <button onclick="addProfile()" class="w-full sm:w-auto px-6 py-4 bg-green-500 text-white rounded-3xl font-bold hover:bg-green-600 transition-colors shadow-lg button-shadow">Add Profile</button>
-                    </div>
-                </div>
-                
                 <hr class="my-6 border-4 border-yellow-300">
-
-                <!-- Parent Mode -->
                 <div class="text-center">
                     <button onclick="showParentModeChallenge()" class="w-full px-6 py-4 bg-purple-500 text-white rounded-3xl font-bold hover:bg-purple-600 transition-colors shadow-lg button-shadow">Parent Mode</button>
                 </div>
-
                 <div id="page-error-message" class="hidden text-center mt-4 p-4 bg-red-200 text-red-800 rounded-2xl font-bold shadow-md"></div>
             </div>
         </div>
@@ -93,11 +93,9 @@
             <div class="w-full max-w-lg bg-yellow-200 p-8 rounded-[3rem] shadow-2xl mb-8 border-4 border-yellow-300">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-4xl font-bold text-slate-800">Parent Mode</h2>
-                    <button onclick="showProfilePage()" class="px-6 py-3 bg-gray-300 text-gray-800 rounded-2xl font-bold hover:bg-gray-400 transition-colors shadow-md">
-                        Back
-                    </button>
+                    <button onclick="showProfilePage()" class="px-6 py-3 bg-gray-300 text-gray-800 rounded-2xl font-bold hover:bg-gray-400 transition-colors shadow-md"> Back </button>
                 </div>
-                
+
                 <!-- Math Challenge -->
                 <div id="math-challenge" class="flex flex-col items-center text-center">
                     <p class="text-3xl font-bold text-slate-800 mb-4">What is <span id="math-question"></span>?</p>
@@ -110,37 +108,57 @@
                 <div id="parent-dashboard" class="hidden">
                     <h3 class="text-3xl font-bold text-slate-800 mb-4 drop-shadow-sm">Edit Profiles</h3>
                     <div id="parent-profile-list" class="flex flex-col gap-4 mb-6">
-                        <!-- Profile buttons will be rendered here -->
                     </div>
+                    <hr class="my-6 border-4 border-yellow-300">
 
-                    <!-- Profile Editing Form -->
+                    <!-- Add New Profile -->
+                    <div>
+                        <h3 class="text-3xl font-bold text-slate-800 mb-4 drop-shadow-sm">Add a New Profile</h3>
+                        <label for="new-profile-input" class="block text-slate-700 font-bold text-xl mb-2">Name your new friend!</label>
+                        <div class="flex flex-col sm:flex-row gap-4 items-center">
+                            <input type="text" id="new-profile-input" placeholder="Name your new profile" class="w-full p-4 border-4 border-green-400 rounded-3xl focus:ring-4 focus:ring-green-500 focus:border-green-500 bg-white transition-colors text-lg">
+                            <button onclick="addProfile()" class="w-full sm:w-auto px-6 py-4 bg-green-500 text-white rounded-3xl font-bold hover:bg-green-600 transition-colors shadow-lg button-shadow">Add Profile</button>
+                        </div>
+                    </div>
+                    <hr class="my-6 border-4 border-yellow-300">
+
+                    <!-- Profile Edit Form -->
                     <div id="profile-edit-form" class="hidden bg-yellow-100 p-6 rounded-[2rem] border-4 border-yellow-300">
                         <h4 class="text-3xl font-bold text-slate-800 mb-4">Editing: <span id="editing-profile-name"></span></h4>
-                        
-                        <!-- Name & Points -->
                         <div class="mb-4">
                             <label for="edit-profile-name-input" class="block text-slate-700 font-bold mb-2">Profile Name</label>
                             <input type="text" id="edit-profile-name-input" class="w-full p-3 border-4 border-blue-400 rounded-2xl">
                         </div>
                         <div class="mb-4">
                             <label for="edit-points-input" class="block text-slate-700 font-bold mb-2">Points</label>
-                            <input type="number" id="edit-points-input" class="w-full p-3 border-4 border-blue-400 rounded-2xl">
+                            <input type="number" id="edit-points-input" class="w-full p-3 border-4 border-blue-400 rounded-2xl" min="0">
                         </div>
 
-                        <!-- Stickers -->
+                        <!-- Reward Settings -->
+                        <div class="mb-6 bg-purple-100 p-4 rounded-2xl border-4 border-purple-300">
+                            <h5 class="text-slate-700 font-bold mb-3 text-2xl">Reward Settings</h5>
+                            <div class="mb-3">
+                                <label for="edit-points-per-sticker" class="block text-slate-700 font-bold mb-2 text-sm">Points to earn 1 Sticker</label>
+                                <input type="number" id="edit-points-per-sticker" class="w-full p-3 border-4 border-purple-400 rounded-2xl" min="1">
+                            </div>
+                            <div>
+                                <label for="edit-stickers-per-prize" class="block text-slate-700 font-bold mb-2 text-sm">Stickers to earn 1 Big Prize</label>
+                                <input type="number" id="edit-stickers-per-prize" class="w-full p-3 border-4 border-purple-400 rounded-2xl" min="1">
+                            </div>
+                        </div>
+                        <!-- End Reward Settings -->
+
                         <div class="mb-4">
                             <h5 class="text-slate-700 font-bold mb-2">Stickers</h5>
                             <div id="edit-stickers-gallery" class="flex flex-wrap gap-2 p-3 bg-white rounded-2xl border-4 border-gray-300">
-                                <!-- Stickers will be loaded here -->
                             </div>
                             <button onclick="addStickerToProfile()" class="mt-2 w-full px-4 py-2 bg-purple-500 text-white rounded-2xl font-bold hover:bg-purple-600 transition-colors shadow-md">Add New Sticker</button>
                         </div>
-
+                        
                         <!-- Tasks -->
                         <div>
                             <h5 class="text-slate-700 font-bold mb-2">Tasks</h5>
                             <div id="edit-tasks-list" class="flex flex-col gap-2">
-                                <!-- Tasks will be loaded here -->
                             </div>
                             <div class="mt-4">
                                 <input type="text" id="edit-task-input" placeholder="New task name" class="w-full p-3 mb-2 border-4 border-blue-400 rounded-2xl">
@@ -158,93 +176,57 @@
                             <div id="parent-task-error-message" class="hidden text-center mt-2 p-2 bg-red-200 text-red-800 rounded-xl font-bold"></div>
                         </div>
 
+                        <!-- Save and Delete Buttons -->
                         <button onclick="saveProfileChanges()" class="w-full px-6 py-3 mt-6 bg-green-500 text-white rounded-3xl font-bold hover:bg-green-600 transition-colors shadow-lg button-shadow">Save Changes</button>
-                        
-                        <!-- Action Buttons -->
                         <hr class="my-6 border-4 border-yellow-300">
                         <div class="flex flex-col sm:flex-row justify-between mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
-                            <button onclick="showClearAllRewardsConfirmation(currentEditingProfile)" class="flex-1 px-4 py-3 bg-pink-500 text-white rounded-2xl font-bold hover:bg-pink-600 transition-colors shadow-md">
-                                🎁 Clear Rewards
-                            </button>
-                            <button onclick="showClearAllConfirmation(currentEditingProfile)" class="flex-1 px-4 py-3 bg-red-500 text-white rounded-2xl font-bold hover:bg-red-600 transition-colors shadow-md">
-                                🗑️ Clear All
-                            </button>
-                            <!-- NEW: Delete Profile Button -->
-                            <button onclick="showDeleteProfileConfirmation(currentEditingProfile)" class="flex-1 px-4 py-3 bg-red-500 text-white rounded-2xl font-bold hover:bg-red-600 transition-colors shadow-md">
-                                ❌ Delete Profile
-                            </button>
+                            <button onclick="showClearAllRewardsConfirmation(currentEditingProfile)" class="flex-1 px-4 py-3 bg-pink-500 text-white rounded-2xl font-bold hover:bg-pink-600 transition-colors shadow-md"> 🎁 Clear Rewards </button>
+                            <button onclick="showClearAllConfirmation(currentEditingProfile)" class="flex-1 px-4 py-3 bg-red-500 text-white rounded-2xl font-bold hover:bg-red-600 transition-colors shadow-md"> 🗑️ Clear All </button>
+                            <button onclick="showDeleteProfileConfirmation(currentEditingProfile)" class="flex-1 px-4 py-3 bg-red-500 text-white rounded-2xl font-bold hover:bg-red-600 transition-colors shadow-md"> ❌ Delete Profile </button>
                         </div>
                     </div>
-                    
                 </div>
             </div>
         </div>
 
-        <!-- Main Routine Page -->
+        <!-- Routine Page -->
         <div id="routine-page" class="page hidden w-full flex flex-col items-center">
             <div class="w-full max-w-lg bg-white p-8 rounded-[3rem] shadow-2xl mb-8 border-4 border-gray-300">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-4xl font-bold text-slate-800">Your Tasks</h2>
-                    <button onclick="showProfilePage()" class="px-6 py-3 bg-gray-300 text-gray-800 rounded-2xl font-bold hover:bg-gray-400 transition-colors shadow-md">
-                        Back
-                    </button>
+                    <button onclick="showProfilePage()" class="px-6 py-3 bg-gray-300 text-gray-800 rounded-2xl font-bold hover:bg-gray-400 transition-colors shadow-md"> Back </button>
                 </div>
-                
-                <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row justify-between mt-4 space-y-2 sm:space-y-0 sm:space-x-2">
-                    <button onclick="resetDay()" class="flex-1 px-4 py-3 bg-yellow-500 text-white rounded-2xl font-bold hover:bg-yellow-600 transition-colors shadow-md">
-                        ⭐ Restart Day
-                    </button>
-                    <button onclick="showStickers()" class="flex-1 px-4 py-3 bg-purple-500 text-white rounded-2xl font-bold hover:bg-purple-600 transition-colors shadow-md">
-                        🖼️ View Stickers
-                    </button>
+                    <button onclick="resetDay()" class="flex-1 px-4 py-3 bg-yellow-500 text-white rounded-2xl font-bold hover:bg-yellow-600 transition-colors shadow-md"> ⭐ Restart Day </button>
+                    <button onclick="showStickers()" class="flex-1 px-4 py-3 bg-purple-500 text-white rounded-2xl font-bold hover:bg-purple-600 transition-colors shadow-md"> 🖼️ View Stickers </button>
                 </div>
             </div>
-
-            <!-- Prominent error message now shown here -->
-            <div id="error-message" class="hidden text-center mt-4 p-4 bg-red-200 text-red-800 rounded-2xl font-bold shadow-md">
-                Please enter a name, a task, and a valid time.
-            </div>
-            
-            <!-- Tasks Container -->
+            <div id="error-message" class="hidden text-center mt-4 p-4 bg-red-200 text-red-800 rounded-2xl font-bold shadow-md"> Please enter a name, a task, and a valid time. </div>
             <div id="tasks-container" class="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-0 mt-6">
-                <!-- Tasks will be added here by JavaScript -->
             </div>
         </div>
 
-        <!-- Success message container -->
-        <div id="success-message-container" class="w-full max-w-xl text-center hidden mb-8 relative z-0">
-            <div class="p-6 bg-lime-200 rounded-2xl shadow-xl border-4 border-lime-400">
-                <p class="text-4xl font-bold text-lime-800 animate-pulse">🎉 Woohoo!</p>
-                <p class="text-xl text-lime-700 mt-2">All tasks completed! You earned a sticker! ✨</p>
+        <!-- NEW: Flexible Animated Reward Modal -->
+        <div id="reward-earned-modal" class="fixed inset-0 bg-pink-500 bg-opacity-75 flex items-center justify-center hidden z-50">
+            <div id="reward-content-card" class="bg-yellow-100 p-8 rounded-[3rem] shadow-2xl relative w-11/12 max-w-xl border-8 border-yellow-300 text-center animate-pop-in">
+                <div id="reward-emoji" class="text-8xl mb-4"></div>
+                <h3 id="reward-title" class="text-5xl font-extrabold text-slate-800 mb-2 drop-shadow-md"></h3>
+                <p id="reward-message" class="text-xl text-slate-700 mb-6"></p>
+                <button onclick="hideRewardModal()" class="px-8 py-4 bg-purple-500 text-white rounded-full font-bold text-xl hover:bg-purple-600 transition-colors shadow-lg button-shadow"> Awesome! </button>
             </div>
         </div>
 
-        <!-- Special prize message container -->
-        <div id="prize-message-container" class="w-full max-w-xl text-center hidden mb-8 relative z-0">
-            <div class="p-6 bg-amber-200 rounded-2xl shadow-xl border-4 border-amber-400">
-                <p class="text-4xl font-bold text-amber-800 animate-pulse-slow">🏆 CONGRATULATIONS!</p>
-                <p class="text-xl text-amber-700 mt-2">You've reached a new prize milestone! 🥇</p>
-                <button onclick="hidePrizeMessage()" class="mt-4 px-6 py-3 bg-amber-500 text-white rounded-3xl font-bold hover:bg-amber-600 transition-colors button-shadow">Got It!</button>
-            </div>
-        </div>
-
-
-        <!-- Sticker Modal -->
+        <!-- Static Modals (Stickers, Confirmation) -->
         <div id="sticker-modal" class="fixed inset-0 bg-blue-500 bg-opacity-75 flex items-center justify-center hidden z-50">
             <div class="bg-yellow-200 p-8 rounded-[2rem] shadow-2xl relative w-11/12 max-w-md border-4 border-yellow-300">
                 <button onclick="hideStickers()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-4xl font-bold leading-none">&times;</button>
-                <h3 class="text-3xl font-bold text-slate-800 mb-4 text-center flex items-center justify-center gap-2">
-                    Your Stickers 
-                    <span id="sticker-count" class="text-xl font-normal text-gray-500">(0)</span>
-                </h3>
+                <h3 class="text-3xl font-bold text-slate-800 mb-4 text-center flex items-center justify-center gap-2"> Your Stickers <span id="sticker-count" class="text-xl font-normal text-gray-500">(0)</span> </h3>
                 <div id="stickers-gallery" class="flex flex-wrap justify-center gap-4 p-4 min-h-[100px] bg-white rounded-2xl border-4 border-yellow-300">
-                    <!-- Stickers will be added here -->
                 </div>
             </div>
         </div>
         
-        <!-- Confirmation Dialog for deleting a single task -->
+        <!-- Confirmation Dialogs (Unchanged) -->
         <div id="confirmation-dialog" class="fixed inset-0 bg-red-400 bg-opacity-75 flex items-center justify-center hidden z-50">
             <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-11/12 max-w-sm text-center border-4 border-red-500">
                 <h3 class="text-2xl font-bold text-slate-800 mb-4">Are you sure you want to delete this task?</h3>
@@ -255,8 +237,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Confirmation Dialog for clearing all data -->
         <div id="clear-all-confirmation-dialog" class="fixed inset-0 bg-red-400 bg-opacity-75 flex items-center justify-center hidden z-50">
             <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-11/12 max-w-sm text-center border-4 border-red-500">
                 <h3 class="text-2xl font-bold text-slate-800 mb-4">Are you sure you want to clear ALL data for <span id="clear-all-profile-name"></span>?</h3>
@@ -267,8 +247,6 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Confirmation Dialog for clearing all rewards -->
         <div id="clear-rewards-confirmation-dialog" class="fixed inset-0 bg-pink-400 bg-opacity-75 flex items-center justify-center hidden z-50">
             <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-11/12 max-w-sm text-center border-4 border-pink-500">
                 <h3 class="text-2xl font-bold text-slate-800 mb-4">Are you sure you want to clear ALL rewards for <span id="clear-rewards-profile-name"></span>?</h3>
@@ -279,8 +257,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- NEW: Confirmation Dialog for deleting a profile -->
         <div id="delete-profile-confirmation-dialog" class="fixed inset-0 bg-red-400 bg-opacity-75 flex items-center justify-center hidden z-50">
             <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-11/12 max-w-sm text-center border-4 border-red-500">
                 <h3 class="text-2xl font-bold text-slate-800 mb-4">Are you sure you want to delete <span id="delete-profile-name"></span>?</h3>
@@ -292,7 +268,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // Global variables and DOM elements
         const UNSPLASH_API_KEY = '0gltiROHlif7Zl0OtXVKAXIXBP9CmXCAXStAKfoSGuU';
@@ -301,18 +276,27 @@
         let points = 0;
         let tasks = []; // Array to store tasks for the current profile
         let stickers = []; // Array to store earned stickers for the current profile
+        let rewardsSettings = { pointsPerSticker: 10, stickersPerPrize: 5 }; // NEW: Default settings
         let totalTasks = 0;
         let completedTasks = 0;
-        let taskToDelete = null; 
-        
+        let taskToDelete = null;
+
         const tasksContainer = document.getElementById('tasks-container');
         const pointsDisplay = document.getElementById('current-points');
         const errorMessage = document.getElementById('error-message');
-        const successMessageContainer = document.getElementById('success-message-container');
-        const prizeMessageContainer = document.getElementById('prize-message-container');
+        
+        // OLD: successMessageContainer and prizeMessageContainer removed
+
+        // NEW: Reward Modal Elements
+        const rewardEarnedModal = document.getElementById('reward-earned-modal');
+        const rewardTitle = document.getElementById('reward-title');
+        const rewardMessage = document.getElementById('reward-message');
+        const rewardEmoji = document.getElementById('reward-emoji');
+        
         const stickerModal = document.getElementById('sticker-modal');
         const stickersGallery = document.getElementById('stickers-gallery');
         const stickerCountDisplay = document.getElementById('sticker-count');
+
         const confirmationDialog = document.getElementById('confirmation-dialog');
         const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
         const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
@@ -324,8 +308,8 @@
         const confirmClearRewardsBtn = document.getElementById('confirm-clear-rewards-btn');
         const cancelClearRewardsBtn = document.getElementById('cancel-clear-rewards-btn');
         const clearRewardsProfileName = document.getElementById('clear-rewards-profile-name');
-        
-        // NEW: Delete Profile elements
+
+        // Delete Profile elements
         const deleteProfileConfirmationDialog = document.getElementById('delete-profile-confirmation-dialog');
         const confirmDeleteProfileBtn = document.getElementById('confirm-delete-profile-btn');
         const cancelDeleteProfileBtn = document.getElementById('cancel-delete-profile-btn');
@@ -334,12 +318,11 @@
         const profileSelect = document.getElementById('profile-select');
         const newProfileInput = document.getElementById('new-profile-input');
         const pageErrorMessage = document.getElementById('page-error-message');
-        
         const profilePage = document.getElementById('profile-page');
         const routinePage = document.getElementById('routine-page');
         const parentModePage = document.getElementById('parent-mode-page');
         const appHeader = document.getElementById('app-header');
-
+        
         const mathQuestionElement = document.getElementById('math-question');
         const mathAnswerInput = document.getElementById('math-answer-input');
         const mathErrorMessage = document.getElementById('math-error-message');
@@ -350,6 +333,11 @@
         const editingProfileName = document.getElementById('editing-profile-name');
         const editProfileNameInput = document.getElementById('edit-profile-name-input');
         const editPointsInput = document.getElementById('edit-points-input');
+        
+        // Reward Setting Inputs
+        const editPointsPerStickerInput = document.getElementById('edit-points-per-sticker');
+        const editStickersPerPrizeInput = document.getElementById('edit-stickers-per-prize');
+
         const editStickersGallery = document.getElementById('edit-stickers-gallery');
         const editTasksList = document.getElementById('edit-tasks-list');
         const editTaskInput = document.getElementById('edit-task-input');
@@ -360,18 +348,11 @@
         
         let correctAnswer = 0;
         let currentEditingProfile = null;
-        
+
         // List of queries to make the stickers more random
         const stickerQueries = [
-            'cute animals',
-            'cartoon characters',
-            'happy smiles',
-            'space',
-            'colorful patterns',
-            'playful illustrations',
-            'funny doodles',
-            'fantasy creatures',
-            'food illustrations',
+            'cute animals', 'cartoon characters', 'happy smiles', 'space', 'colorful patterns', 
+            'playful illustrations', 'funny doodles', 'fantasy creatures', 'food illustrations', 
             'nature stickers'
         ];
 
@@ -384,6 +365,7 @@
             // Clear any old messages
             pageErrorMessage.classList.add('hidden');
             errorMessage.classList.add('hidden');
+            hideRewardModal(); // Ensure reward modal is hidden
         }
 
         function showRoutinePage() {
@@ -394,6 +376,7 @@
             // Clear any old messages
             pageErrorMessage.classList.add('hidden');
             errorMessage.classList.add('hidden');
+            hideRewardModal(); // Ensure reward modal is hidden
         }
 
         function showParentModeChallenge() {
@@ -406,6 +389,7 @@
             parentDashboardSection.classList.add('hidden');
             mathErrorMessage.classList.add('hidden');
             mathAnswerInput.value = '';
+            hideRewardModal(); // Ensure reward modal is hidden
         }
 
         function generateMathQuestion() {
@@ -414,7 +398,7 @@
             correctAnswer = num1 * num2;
             mathQuestionElement.textContent = `${num1} x ${num2}`;
         }
-        
+
         window.checkMathAnswer = function() {
             const userAnswer = parseInt(mathAnswerInput.value, 10);
             if (userAnswer === correctAnswer) {
@@ -447,11 +431,15 @@
         window.editProfileDetails = function(profileName) {
             currentEditingProfile = profileName;
             const profileData = profiles[profileName];
-            
+
             editingProfileName.textContent = profileName;
             editProfileNameInput.value = profileName;
             editPointsInput.value = profileData.points;
             
+            // Render rewards settings
+            editPointsPerStickerInput.value = profileData.rewardsSettings.pointsPerSticker;
+            editStickersPerPrizeInput.value = profileData.rewardsSettings.stickersPerPrize;
+
             // Render tasks
             editTasksList.innerHTML = '';
             profileData.tasks.forEach((task, index) => {
@@ -459,13 +447,16 @@
                 taskItem.className = 'flex items-center justify-between p-2 bg-white rounded-xl border-4 border-gray-300';
                 
                 const timeParts = task.taskTime.split(':');
-                let hour12 = parseInt(timeParts[0], 10);
+                let hour24 = parseInt(timeParts[0], 10);
+                let hour12 = hour24;
                 let ampm = 'AM';
+
                 if (hour12 >= 12) {
                     ampm = 'PM';
                     if (hour12 > 12) hour12 -= 12;
                 }
                 if (hour12 === 0) hour12 = 12;
+
                 const displayTime = `${String(hour12).padStart(2, '0')}:${timeParts[1]} ${ampm}`;
 
                 taskItem.innerHTML = `
@@ -474,7 +465,7 @@
                 `;
                 editTasksList.appendChild(taskItem);
             });
-            
+
             // Render stickers
             editStickersGallery.innerHTML = '';
             profileData.stickers.forEach((stickerUrl, index) => {
@@ -492,17 +483,29 @@
 
         window.saveProfileChanges = function() {
             if (!currentEditingProfile) return;
+
             const oldName = currentEditingProfile;
             const newName = editProfileNameInput.value.trim();
             const newPoints = parseInt(editPointsInput.value, 10);
             
+            // Get reward settings
+            const newPointsPerSticker = parseInt(editPointsPerStickerInput.value, 10);
+            const newStickersPerPrize = parseInt(editStickersPerPrizeInput.value, 10);
+
             if (newName !== oldName) {
                 profiles[newName] = profiles[oldName];
                 delete profiles[oldName];
                 currentEditingProfile = newName;
             }
 
-            profiles[currentEditingProfile].points = isNaN(newPoints) ? 0 : newPoints;
+            profiles[currentEditingProfile].points = isNaN(newPoints) ? 0 : Math.max(0, newPoints);
+            
+            // Save reward settings
+            profiles[currentEditingProfile].rewardsSettings = {
+                pointsPerSticker: (isNaN(newPointsPerSticker) || newPointsPerSticker < 1) ? 10 : newPointsPerSticker,
+                stickersPerPrize: (isNaN(newStickersPerPrize) || newStickersPerPrize < 1) ? 5 : newStickersPerPrize,
+            };
+
             saveProfiles();
             populateProfileDropdown();
             renderParentProfileList();
@@ -523,7 +526,7 @@
 
         window.addTaskToProfile = async function() {
             if (!currentEditingProfile) return;
-            
+
             const newTaskName = editTaskInput.value.trim();
             const hour = parseInt(editTaskHour.value, 10);
             const minute = parseInt(editTaskMinute.value, 10);
@@ -534,6 +537,7 @@
                 parentTaskErrorMessage.classList.remove('hidden');
                 return;
             }
+
             parentTaskErrorMessage.classList.add('hidden');
 
             let hours24 = hour;
@@ -543,9 +547,10 @@
             if (ampm === 'AM' && hours24 === 12) {
                 hours24 = 0;
             }
-            const taskTime = `${String(hours24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 
+            const taskTime = `${String(hours24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
             let imageUrl = 'https://placehold.co/200x200/cccccc/FFFFFF?text=' + encodeURIComponent(newTaskName);
+
             try {
                 const response = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(newTaskName)}&client_id=${UNSPLASH_API_KEY}&per_page=1`);
                 const data = await response.json();
@@ -556,13 +561,7 @@
                 console.error('Error fetching image from Unsplash:', error);
             }
 
-            const newTask = {
-                taskName: newTaskName,
-                taskTime,
-                imageUrl,
-                isCompleted: false
-            };
-            
+            const newTask = { taskName: newTaskName, taskTime, imageUrl, isCompleted: false };
             profiles[currentEditingProfile].tasks.push(newTask);
             saveProfiles();
             editTaskInput.value = '';
@@ -573,20 +572,19 @@
         }
 
         window.addStickerToProfile = async function() {
-             if (!currentEditingProfile) return;
-             const newStickerUrl = await getStickerImage(getRandomStickerQuery());
-             profiles[currentEditingProfile].stickers.push(newStickerUrl);
-             saveProfiles();
-             editProfileDetails(currentEditingProfile); // Re-render the form
+            if (!currentEditingProfile) return;
+            const newStickerUrl = await getStickerImage(getRandomStickerQuery());
+            profiles[currentEditingProfile].stickers.push(newStickerUrl);
+            saveProfiles();
+            editProfileDetails(currentEditingProfile); // Re-render the form
         }
-
 
         function getRandomStickerQuery() {
             const randomIndex = Math.floor(Math.random() * stickerQueries.length);
             return stickerQueries[randomIndex];
         }
 
-        // --- Core Data Management ---
+        // --- Core Data Management --- 
         function saveProfiles() {
             try {
                 localStorage.setItem('kidsRoutineProfiles', JSON.stringify(profiles));
@@ -594,12 +592,17 @@
                 console.error("Error saving profiles to localStorage:", e);
             }
         }
-        
+
         function loadProfiles() {
             try {
                 const storedProfiles = localStorage.getItem('kidsRoutineProfiles');
                 if (storedProfiles) {
                     profiles = JSON.parse(storedProfiles);
+                    // Ensure all existing profiles have the new rewardsSettings structure
+                    const defaultRewards = { pointsPerSticker: 10, stickersPerPrize: 5 };
+                    for (const name in profiles) {
+                        profiles[name].rewardsSettings = profiles[name].rewardsSettings || defaultRewards;
+                    }
                 }
             } catch (e) {
                 console.error("Error loading profiles from localStorage:", e);
@@ -616,12 +619,13 @@
                 profileSelect.appendChild(option);
             });
         }
-        
+
         function saveCurrentProfileData() {
             if (currentProfile) {
                 profiles[currentProfile].points = points;
                 profiles[currentProfile].tasks = tasks;
                 profiles[currentProfile].stickers = stickers;
+                profiles[currentProfile].rewardsSettings = rewardsSettings; // Save current settings
                 saveProfiles();
             }
         }
@@ -629,27 +633,44 @@
         function loadCurrentProfileData() {
             if (currentProfile && profiles[currentProfile]) {
                 const data = profiles[currentProfile];
+                const defaultRewards = { pointsPerSticker: 10, stickersPerPrize: 5 };
+
                 points = data.points || 0;
                 tasks = data.tasks || [];
                 stickers = data.stickers || [];
+                rewardsSettings = data.rewardsSettings || defaultRewards; // Load or set defaults
+
                 updatePointsDisplay();
                 renderTasks();
             }
         }
 
-        // --- UI Update and Rendering ---
+        // --- UI Update and Rendering --- 
         function updatePointsDisplay() {
             pointsDisplay.textContent = points;
         }
 
-        window.hidePrizeMessage = function() {
-            prizeMessageContainer.classList.add('hidden');
+        // NEW: Flexible Reward Modal Functions
+        window.showRewardModal = function(type) {
+            if (type === 'Sticker') {
+                rewardTitle.textContent = 'Sticker Earned!';
+                rewardMessage.textContent = 'You earned a new sticker for your collection!';
+                rewardEmoji.innerHTML = '✨';
+            } else if (type === 'Prize') {
+                rewardTitle.textContent = '🏆 PRIZE MILESTONE! 🥇';
+                rewardMessage.textContent = 'You have earned enough stickers for a BIG prize!';
+                rewardEmoji.innerHTML = '🎉';
+            }
+            rewardEarnedModal.classList.remove('hidden');
         }
-        
+
+        window.hideRewardModal = function() {
+            rewardEarnedModal.classList.add('hidden');
+        }
+
         function renderTasks() {
             tasksContainer.innerHTML = '';
             tasks.sort((a, b) => a.taskTime.localeCompare(b.taskTime));
-
             totalTasks = tasks.length;
             completedTasks = tasks.filter(task => task.isCompleted).length;
             updatePointsDisplay();
@@ -657,18 +678,20 @@
             tasks.forEach((task, index) => {
                 const taskCard = document.createElement('div');
                 const timeParts = task.taskTime.split(':');
-                let hour12 = parseInt(timeParts[0], 10);
+                let hour24 = parseInt(timeParts[0], 10);
+                let hour12 = hour24;
                 let ampm = 'AM';
+
                 if (hour12 >= 12) {
                     ampm = 'PM';
                     if (hour12 > 12) hour12 -= 12;
                 }
                 if (hour12 === 0) hour12 = 12;
-
+                
                 taskCard.className = `task-card bg-white rounded-3xl p-6 shadow-xl flex flex-col items-center relative transition-all duration-300 border-4 border-gray-300 ${task.isCompleted ? 'completed' : ''}`;
                 taskCard.setAttribute('data-time', task.taskTime);
                 taskCard.setAttribute('data-index', index);
-                
+
                 let buttonText = 'Complete';
                 let buttonClasses = 'bg-blue-500 hover:bg-blue-600 button-shadow';
                 if (task.isCompleted) {
@@ -677,9 +700,7 @@
                 }
 
                 taskCard.innerHTML = `
-                    <button onclick="showDeleteDialog(this)" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors text-3xl leading-none">
-                        &times;
-                    </button>
+                    <button onclick="showDeleteDialog(this)" class="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 transition-colors text-3xl leading-none"> &times; </button>
                     <div class="absolute top-4 right-10 text-sm font-bold bg-sky-100 text-sky-800 px-3 py-1 rounded-full border-2 border-sky-300">${hour12}:${timeParts[1]} ${ampm}</div>
                     <img src="${task.imageUrl}" alt="${task.taskName}" class="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full mb-4 shadow-md border-4 border-gray-300">
                     <h3 class="text-2xl font-bold text-slate-800 mb-2 text-center">${task.taskName}</h3>
@@ -703,316 +724,278 @@
             return 'https://placehold.co/100x100/A855F7/FFFFFF?text=Sticker';
         }
 
+        async function awardStickerAndCheckPrize(isDailyCompletion = false) {
+            // 1. Award Sticker
+            const newStickerUrl = await getStickerImage(getRandomStickerQuery());
+            stickers.push(newStickerUrl);
+            updateStickerCountDisplay();
+            
+            // 2. Show Sticker Reward Modal
+            showRewardModal('Sticker'); 
+
+            // 3. Check for Prize Milestone
+            if (stickers.length > 0 && stickers.length % rewardsSettings.stickersPerPrize === 0) {
+                // If a prize is earned, update the modal content after a short delay
+                setTimeout(() => {
+                    showRewardModal('Prize');
+                }, 1000); 
+            }
+        }
+
         async function checkCompletion() {
             if (totalTasks > 0 && completedTasks === totalTasks) {
-                successMessageContainer.classList.remove('hidden');
-                
-                // Fetch a new random sticker image for completing all tasks
-                const newStickerUrl = await getStickerImage(getRandomStickerQuery());
-                stickers.push(newStickerUrl);
-                
+                // Path A: Daily completion automatically awards a sticker
+                // The sticker award function handles showing the modal
+                await awardStickerAndCheckPrize(true);
+
                 saveCurrentProfileData();
-                const lastStickerPrizeLevel = profiles[currentProfile].lastStickerPrizeLevel || 0;
-                if (stickers.length > 0 && stickers.length % 5 === 0 && stickers.length !== lastStickerPrizeLevel) {
-                    prizeMessageContainer.classList.remove('hidden');
-                    profiles[currentProfile].lastStickerPrizeLevel = stickers.length;
-                }
-            } else {
-                 successMessageContainer.classList.add('hidden');
             }
         }
 
-        // --- Event Handlers ---
-        window.loadProfile = function() {
-            const selectedProfile = profileSelect.value;
-            if (selectedProfile) {
-                currentProfile = selectedProfile;
-                loadCurrentProfileData();
-                showRoutinePage();
-            } else {
-                pageErrorMessage.textContent = 'Please select a profile to load.';
-                pageErrorMessage.classList.remove('hidden');
-            }
-        }
-
+        // --- Event Handlers and Main Logic --- 
         window.addProfile = function() {
-            const newName = newProfileInput.value.trim();
-            if (!newName) {
-                pageErrorMessage.textContent = 'Please enter a name for the new profile.';
-                pageErrorMessage.classList.remove('hidden');
+            const name = newProfileInput.value.trim();
+            pageErrorMessage.classList.add('hidden');
+
+            if (!name) {
+                document.getElementById('page-error-message').textContent = 'Please enter a name for the new profile.';
+                document.getElementById('page-error-message').classList.remove('hidden');
                 return;
             }
-            if (profiles[newName]) {
-                pageErrorMessage.textContent = 'A profile with this name already exists.';
-                pageErrorMessage.classList.remove('hidden');
+            if (profiles[name]) {
+                document.getElementById('page-error-message').textContent = 'A profile with this name already exists.';
+                document.getElementById('page-error-message').classList.remove('hidden');
                 return;
             }
-            profiles[newName] = { points: 0, tasks: [], stickers: [], lastStickerPrizeLevel: 0, lastPointPrizeLevel: 0 };
+
+            profiles[name] = { 
+                points: 0, 
+                tasks: [], 
+                stickers: [],
+                rewardsSettings: { pointsPerSticker: 10, stickersPerPrize: 5 } // Add default settings
+            };
+            
             saveProfiles();
             populateProfileDropdown();
+            renderParentProfileList(); // Update the list in the dashboard
             newProfileInput.value = '';
-            profileSelect.value = newName;
-            currentProfile = newName;
+        }
+
+        window.loadProfile = function() {
+            const selectedProfile = profileSelect.value;
+            pageErrorMessage.classList.add('hidden');
+
+            if (!selectedProfile) {
+                pageErrorMessage.textContent = 'Please select a profile to start the routine!';
+                pageErrorMessage.classList.remove('hidden');
+                return;
+            }
+
+            currentProfile = selectedProfile;
             loadCurrentProfileData();
             showRoutinePage();
         }
 
-        window.checkTask = async function(button, taskTime, index) {
-            if (!currentProfile) return;
+        window.checkTask = async function(button, time, index) {
+            if (tasks[index].isCompleted) return;
 
-            const now = new Date();
-            const [hours, minutes] = taskTime.split(':').map(Number);
-            const dueTime = new Date();
-            dueTime.setHours(hours, minutes, 0, 0);
-
-            const taskCard = button.closest('.task-card');
-
-            if (now <= dueTime) {
-                button.textContent = '✅ Done!';
-                button.classList.remove('bg-blue-500', 'hover:bg-blue-600', 'button-shadow');
-                button.classList.add('bg-lime-500', 'hover:bg-lime-600');
-                points++;
-                completedTasks++;
-                updatePointsDisplay();
-
-                const lastPointPrizeLevel = profiles[currentProfile].lastPointPrizeLevel || 0;
-                if (points > 0 && points % 20 === 0 && points !== lastPointPrizeLevel) {
-                    prizeMessageContainer.classList.remove('hidden');
-                    
-                    // Fetch a new random sticker for the points milestone
-                    const newStickerUrl = await getStickerImage(getRandomStickerQuery());
-                    stickers.push(newStickerUrl);
-                    
-                    profiles[currentProfile].lastPointPrizeLevel = points;
-                }
-            } else {
-                button.textContent = '❌ Missed!';
-                button.classList.remove('bg-blue-500', 'hover:bg-blue-600', 'button-shadow');
-                button.classList.add('bg-red-500', 'hover:bg-red-600');
-            }
-            
+            // Mark task complete
             tasks[index].isCompleted = true;
+            points += 1; // Award 1 point
+            completedTasks++;
+            
+            let stickerGained = false;
+
+            // Path B: Check for Points-to-Sticker Exchange
+            while (points >= rewardsSettings.pointsPerSticker) {
+                points -= rewardsSettings.pointsPerSticker;
+                await awardStickerAndCheckPrize(); // awards sticker, updates display, and checks for prize
+                stickerGained = true; 
+            }
+
             saveCurrentProfileData();
-
-            button.disabled = true;
-            taskCard.classList.add('completed');
+            updatePointsDisplay();
+            // Re-render to update the button, opacity, and check checkCompletion
+            renderTasks(); 
             
-            checkCompletion();
-        }
-
-        window.addTask = async function() {
-            if (!currentProfile) {
-                pageErrorMessage.textContent = 'Please select or add a profile before adding a task.';
-                pageErrorMessage.classList.remove('hidden');
-                return;
-            }
-
-            const taskName = taskInput.value.trim();
-            const hour = parseInt(taskHourInput.value, 10);
-            const minute = parseInt(taskMinuteInput.value, 10);
-            const ampm = taskAmpmSelect.value;
-            
-            if (!taskName || isNaN(hour) || isNaN(minute) || !ampm || hour < 1 || hour > 12 || minute < 0 || minute > 59) {
-                errorMessage.textContent = 'Please enter a name, a task, and a valid time (e.g., Hour: 8, Minute: 30, AM).';
-                errorMessage.classList.remove('hidden');
-                return;
-            }
-
             errorMessage.classList.add('hidden');
-
-            let hours24 = hour;
-            if (ampm === 'PM' && hours24 < 12) {
-                hours24 += 12;
-            }
-            if (ampm === 'AM' && hours24 === 12) {
-                hours24 = 0;
-            }
-            const taskTime = `${String(hours24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-            
-            let imageUrl = 'https://placehold.co/200x200/cccccc/FFFFFF?text=' + encodeURIComponent(taskName);
-
-            try {
-                const response = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(taskName)}&client_id=${UNSPLASH_API_KEY}&per_page=1`);
-                const data = await response.json();
-                if (data.results && data.results.length > 0) {
-                    imageUrl = data.results[0].urls.small;
-                }
-            } catch (error) {
-                console.error('Error fetching image from Unsplash:', error);
-            }
-
-            const newTask = {
-                taskName,
-                taskTime,
-                imageUrl,
-                isCompleted: false
-            };
-            
-            tasks.push(newTask);
-            saveCurrentProfileData();
-            renderTasks();
-
-            taskInput.value = "";
-            taskHourInput.value = "";
-            taskMinuteInput.value = "";
-            taskAmpmSelect.value = "";
         }
-
-        // --- Confirmation Dialogs and Actions ---
-        window.showDeleteDialog = function(button) {
-            taskToDelete = button.closest('.task-card');
-            confirmationDialog.classList.remove('hidden');
-        };
-
-        window.deleteTask = function() {
-            if (taskToDelete) {
-                const index = parseInt(taskToDelete.getAttribute('data-index'), 10);
-                tasks.splice(index, 1);
-                renderTasks();
-                saveCurrentProfileData();
-                taskToDelete = null;
-                confirmationDialog.classList.add('hidden');
-            }
-        };
-        confirmDeleteBtn.addEventListener('click', deleteTask);
-        cancelDeleteBtn.addEventListener('click', () => {
-            confirmationDialog.classList.add('hidden');
-            taskToDelete = null;
-        });
-
-        window.showClearAllConfirmation = function(profileName) {
-            clearAllProfileName.textContent = profileName;
-            clearAllConfirmationDialog.classList.remove('hidden');
-        };
-        
-        function performClearAllTasks(profileName) {
-            if (profileName) {
-                profiles[profileName].tasks = [];
-                profiles[profileName].points = 0;
-                profiles[profileName].stickers = [];
-                profiles[profileName].lastStickerPrizeLevel = 0;
-                profiles[profileName].lastPointPrizeLevel = 0;
-                saveProfiles();
-                // If the cleared profile is the current one, reload its state
-                if (profileName === currentProfile) {
-                     loadCurrentProfileData();
-                } else {
-                    editProfileDetails(profileName); // Re-render the form
-                }
-                successMessageContainer.classList.add('hidden');
-                prizeMessageContainer.classList.add('hidden');
-                clearAllConfirmationDialog.classList.add('hidden');
-            }
-        }
-        confirmClearAllBtn.addEventListener('click', () => {
-            performClearAllTasks(clearAllProfileName.textContent);
-        });
-        cancelClearAllBtn.addEventListener('click', () => {
-            clearAllConfirmationDialog.classList.add('hidden');
-        });
 
         window.resetDay = function() {
-            if (currentProfile) {
-                tasks.forEach(task => task.isCompleted = false);
-                saveCurrentProfileData();
-                renderTasks();
-                successMessageContainer.classList.add('hidden');
-                prizeMessageContainer.classList.add('hidden');
-            }
+            tasks.forEach(task => task.isCompleted = false);
+            completedTasks = 0;
+            hideRewardModal(); // Hide any active reward message
+            saveCurrentProfileData();
+            renderTasks();
         }
 
-        window.showClearAllRewardsConfirmation = function(profileName) {
-            clearRewardsProfileName.textContent = profileName;
-            clearRewardsConfirmationDialog.classList.remove('hidden');
-        };
-
-        window.performClearAllRewards = function(profileName) {
-            if (profileName) {
-                profiles[profileName].points = 0;
-                profiles[profileName].stickers = [];
-                profiles[profileName].lastStickerPrizeLevel = 0;
-                profiles[profileName].lastPointPrizeLevel = 0;
-                saveProfiles();
-                // If the cleared profile is the current one, reload its state
-                if (profileName === currentProfile) {
-                    loadCurrentProfileData();
-                } else {
-                    editProfileDetails(profileName); // Re-render the form
-                }
-                successMessageContainer.classList.add('hidden');
-                prizeMessageContainer.classList.add('hidden');
-                clearRewardsConfirmationDialog.classList.add('hidden');
-            }
-        }
-        confirmClearRewardsBtn.addEventListener('click', () => {
-            performClearAllRewards(clearRewardsProfileName.textContent);
-        });
-        cancelClearRewardsBtn.addEventListener('click', () => {
-            clearRewardsConfirmationDialog.classList.add('hidden');
-        });
-
-        // NEW: Delete Profile Functions
-        window.showDeleteProfileConfirmation = function(profileName) {
-            deleteProfileName.textContent = profileName;
-            deleteProfileConfirmationDialog.classList.remove('hidden');
-        };
-
-        window.deleteProfile = function() {
-            const profileToDelete = deleteProfileName.textContent;
-            if (profiles[profileToDelete]) {
-                delete profiles[profileToDelete];
-                saveProfiles();
-                populateProfileDropdown();
-                deleteProfileConfirmationDialog.classList.add('hidden');
-                showParentDashboard(); // Go back to the main parent dashboard list
-                
-                // If the deleted profile was the current one, reset the app state
-                if (currentProfile === profileToDelete) {
-                    currentProfile = null;
-                    showProfilePage();
-                }
-            }
-        };
-
-        confirmDeleteProfileBtn.addEventListener('click', deleteProfile);
-        cancelDeleteProfileBtn.addEventListener('click', () => {
-            deleteProfileConfirmationDialog.classList.add('hidden');
-        });
-
-        // --- Sticker Modal ---
         window.showStickers = function() {
             stickersGallery.innerHTML = '';
-            stickerCountDisplay.textContent = `(${stickers.length})`;
-            
             if (stickers.length === 0) {
-                stickersGallery.innerHTML = '<p class="text-gray-500 text-center">No stickers earned yet!</p>';
+                stickersGallery.innerHTML = '<p class="text-xl text-gray-500 text-center w-full">No stickers yet! Complete your tasks or earn points to get one! ✨</p>';
             } else {
-                stickers.forEach(stickerUrl => {
-                    const stickerElement = document.createElement('div');
-                    stickerElement.className = 'w-24 h-24 rounded-full overflow-hidden shadow-lg border-4 border-purple-500';
+                stickers.forEach(url => {
                     const img = document.createElement('img');
-                    img.src = stickerUrl;
-                    img.alt = 'Sticker';
-                    img.className = 'w-full h-full object-cover';
-                    stickerElement.appendChild(img);
-                    stickersGallery.appendChild(stickerElement);
+                    img.src = url;
+                    img.alt = 'Earned Sticker';
+                    img.className = 'w-24 h-24 object-cover rounded-full shadow-lg border-4 border-purple-400 transform transition-transform duration-300 hover:scale-110';
+                    stickersGallery.appendChild(img);
                 });
             }
+
+            updateStickerCountDisplay();
             stickerModal.classList.remove('hidden');
+        }
+
+        function updateStickerCountDisplay() {
+            stickerCountDisplay.textContent = `(${stickers.length})`;
         }
 
         window.hideStickers = function() {
             stickerModal.classList.add('hidden');
         }
-        
-        // --- Initialization ---
-        window.onload = () => {
+
+        // Confirmation Dialog functions (Unchanged)
+        window.showDeleteDialog = function(button) {
+            const taskCard = button.closest('.task-card');
+            taskToDelete = parseInt(taskCard.getAttribute('data-index'), 10);
+            confirmationDialog.classList.remove('hidden');
+        }
+
+        window.confirmDeleteTask = function() {
+            if (taskToDelete !== null) {
+                tasks.splice(taskToDelete, 1);
+                taskToDelete = null;
+                saveCurrentProfileData();
+                renderTasks();
+            }
+            confirmationDialog.classList.add('hidden');
+        }
+
+        window.cancelDeleteTask = function() {
+            taskToDelete = null;
+            confirmationDialog.classList.add('hidden');
+        }
+
+        window.showClearAllConfirmation = function(profileName) {
+            currentEditingProfile = profileName; // Make sure this is set for the confirmation dialog
+            clearAllProfileName.textContent = profileName;
+            clearAllConfirmationDialog.classList.remove('hidden');
+        }
+
+        window.confirmClearAll = function() {
+            if (currentEditingProfile && profiles[currentEditingProfile]) {
+                // Reset to initial state including default rewards settings
+                profiles[currentEditingProfile] = { 
+                    points: 0, 
+                    tasks: [], 
+                    stickers: [],
+                    rewardsSettings: { pointsPerSticker: 10, stickersPerPrize: 5 } 
+                };
+                
+                if (currentProfile === currentEditingProfile) {
+                    // If clearing the active profile, reset client-side state
+                    points = 0;
+                    tasks = [];
+                    stickers = [];
+                    rewardsSettings = { pointsPerSticker: 10, stickersPerPrize: 5 };
+                    showProfilePage(); // Go back to profile select
+                }
+
+                saveProfiles();
+                renderParentProfileList();
+                profileEditForm.classList.add('hidden');
+                populateProfileDropdown();
+            }
+            clearAllConfirmationDialog.classList.add('hidden');
+        }
+
+        window.cancelClearAll = function() {
+            clearAllConfirmationDialog.classList.add('hidden');
+        }
+
+        window.showClearAllRewardsConfirmation = function(profileName) {
+            currentEditingProfile = profileName;
+            clearRewardsProfileName.textContent = profileName;
+            clearRewardsConfirmationDialog.classList.remove('hidden');
+        }
+
+        window.confirmClearRewards = function() {
+            if (currentEditingProfile && profiles[currentEditingProfile]) {
+                profiles[currentEditingProfile].points = 0;
+                profiles[currentEditingProfile].stickers = [];
+
+                if (currentProfile === currentEditingProfile) {
+                    points = 0;
+                    stickers = [];
+                    updatePointsDisplay();
+                    updateStickerCountDisplay();
+                    hideRewardModal(); // Hide any active reward message
+                }
+
+                saveProfiles();
+                editProfileDetails(currentEditingProfile); // Re-render the form
+            }
+            clearRewardsConfirmationDialog.classList.add('hidden');
+        }
+
+        window.cancelClearRewards = function() {
+            clearRewardsConfirmationDialog.classList.add('hidden');
+        }
+
+        // Delete Profile functions
+        window.showDeleteProfileConfirmation = function(profileName) {
+            currentEditingProfile = profileName;
+            deleteProfileName.textContent = profileName;
+            deleteProfileConfirmationDialog.classList.remove('hidden');
+        }
+
+        window.confirmDeleteProfile = function() {
+            if (currentEditingProfile) {
+                // Delete the profile
+                delete profiles[currentEditingProfile];
+
+                if (currentProfile === currentEditingProfile) {
+                    // If deleting the active profile, clear the active state and go back to profile select
+                    currentProfile = null;
+                    points = 0;
+                    tasks = [];
+                    stickers = [];
+                    rewardsSettings = { pointsPerSticker: 10, stickersPerPrize: 5 };
+                    showProfilePage();
+                }
+
+                saveProfiles();
+                renderParentProfileList(); // Update the list in the dashboard
+                profileEditForm.classList.add('hidden'); // Hide the form
+                populateProfileDropdown(); // Update the main select list
+                currentEditingProfile = null;
+            }
+            deleteProfileConfirmationDialog.classList.add('hidden');
+        }
+
+        window.cancelDeleteProfile = function() {
+            deleteProfileConfirmationDialog.classList.add('hidden');
+        }
+
+        // --- Initialization --- 
+        function init() {
             loadProfiles();
             populateProfileDropdown();
-            // Show the profile page first
-            showProfilePage();
-        };
+            showProfilePage(); // Start on the profile selection page
+
+            // Hook up confirmation buttons
+            confirmDeleteBtn.onclick = confirmDeleteTask;
+            cancelDeleteBtn.onclick = cancelDeleteTask;
+            confirmClearAllBtn.onclick = confirmClearAll;
+            cancelClearAllBtn.onclick = cancelClearAll;
+            confirmClearRewardsBtn.onclick = confirmClearRewards;
+            cancelClearRewardsBtn.onclick = cancelClearRewards;
+            confirmDeleteProfileBtn.onclick = confirmDeleteProfile;
+            cancelDeleteProfileBtn.onclick = cancelDeleteProfile;
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
-
